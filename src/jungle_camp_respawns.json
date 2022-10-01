@@ -1,0 +1,172 @@
+{
+	"gromp_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 2288.0185546875,
+			"y": 8448.1337890625,
+			"z": 51.777305603027344
+		},
+		"initial_time": "01:42",
+		"respawn_time": "02:15"
+	},
+	"blue_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 3821.488525390625,
+			"y": 8101.05419921875,
+			"z": 51.12874221801758
+		},
+		"initial_time": "01:30",
+		"respawn_time": "05:00"
+	},
+	"wolves_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 3783.3798828125,
+			"y": 6495.56005859375,
+			"z": 52.46272277832031
+		},
+		"initial_time": "01:30",
+		"respawn_time": "02:15"
+	},
+	"raptors_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 7061.5,
+			"y": 5325.509765625,
+			"z": 50.12364196777344
+		},
+		"initial_time": "01:30",
+		"respawn_time": "02:15"
+	},
+	"red_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 7762.24365234375,
+			"y": 4011.186767578125,
+			"z": 53.967735290527344
+		},
+		"initial_time": "01:30",
+		"respawn_time": "05:00"
+	},
+	"krugs_blue": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 8394.76953125,
+			"y": 2641.590087890625,
+			"z": 50.7310676574707
+		},
+		"initial_time": "01:42",
+		"respawn_time": "02:15"
+	},
+	"gromp_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 12703.62890625,
+			"y": 6443.98388671875,
+			"z": 51.6907844543457
+		},
+		"initial_time": "01:42",
+		"respawn_time": "02:15"
+	},
+	"blue_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 11131.728515625,
+			"y": 6990.84423828125,
+			"z": 51.72368621826172
+		},
+		"initial_time": "01:30",
+		"respawn_time": "05:00"
+	},
+	"wolves_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 11059.76953125,
+			"y": 8419.830078125,
+			"z": 60.35258483886719
+		},
+		"initial_time": "01:30",
+		"respawn_time": "02:15"
+	},
+	"raptors_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 7820.22021484375,
+			"y": 9644.4501953125,
+			"z": 52.19202423095703
+		},
+		"initial_time": "01:30",
+		"respawn_time": "02:15"
+	},
+	"red_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 7066.869140625,
+			"y": 10975.546875,
+			"z": 56.186641693115234
+		},
+		"initial_time": "01:30",
+		"respawn_time": "05:00"
+	},
+	"krugs_red": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 6499.490234375,
+			"y": 12287.3798828125,
+			"z": 56.47679901123047
+		},
+		"initial_time": "01:42",
+		"respawn_time": "02:15"
+	},
+	"scuttle_top": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 4400.0,
+			"y": 9600.0,
+			"z": -66.53082275390625
+		},
+		"initial_time": "03:15",
+		"respawn_time": "02:30"
+	},
+	"scuttle_bottom": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 10500.0,
+			"y": 5170.0,
+			"z": -62.81019973754883
+		},
+		"initial_time": "03:15",
+		"respawn_time": "02:30"
+	},
+	"drake": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 9866.1484375,
+			"y": 4414.01416015625,
+			"z": -71.2406005859375
+		},
+		"initial_time": "05:00",
+		"respawn_time": "05:00"
+	},
+	"herald": {
+        "category": "SRU_CampRespawnMarker",
+		"spawn_pos": {
+			"x": 5007.12353515625,
+			"y": 10471.4462890625,
+			"z": -71.2406005859375
+		},
+		"initial_time": "08:00",
+		"respawn_time": "06:00"
+	},
+	"baron": {
+        "category": "SRU_BaronSpawn",
+		"spawn_pos": {
+			"x": 5007.12353515625,
+			"y": 10471.4462890625,
+			"z": -71.2406005859375
+		},
+		"initial_time": "20:00",
+		"respawn_time": "06:00"
+	}
+}
