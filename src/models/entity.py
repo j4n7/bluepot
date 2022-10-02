@@ -3,16 +3,16 @@ import math
 from functools import cached_property
 from pathlib import Path
 
-import src.offsets as offsets
+import data.offsets as offsets
 
 
-base_dir = Path(__file__).parent.parent
-src_dir = base_dir / 'src'
+base_dir = Path(__file__).parent.parent.parent
+data_dir = base_dir / 'data'
 
-with open(src_dir / 'jungle_camp_respawns.json') as json_file:
+with open(data_dir / 'jungle_camp_respawns.json') as json_file:
     jungle_camps_resapwns = json.load(json_file)
 
-with open(src_dir / 'jungle_monsters.json') as json_file:
+with open(data_dir / 'jungle_monsters.json') as json_file:
     jungle_monsters = json.load(json_file)
 
 
@@ -61,7 +61,7 @@ class Entity:
     def category(self):
         # TODO: all plants, wards and super-minions
         if self.name_memory == 'PreSeason_Turret_Shield':
-            return 'turret_shield'
+            return 'tower_shield'
         if self.name_memory == 'SRU_PlantRespawnMarker':
             return 'plant_respawn'
         if self.name_memory == 'SRU_Plant_Health':

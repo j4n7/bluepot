@@ -1,4 +1,4 @@
-from models.entity import Entity
+from src.models.entity import Entity
 
 
 class EntityManager:

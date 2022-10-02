@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-import src.offsets as offsets
+import data.offsets as offsets
 
 
 class Chat:

@@ -25,7 +25,7 @@ message_sent_0_len = 0x0130  # Int32 [+ 0xC for next message]
 message_current = 0x0734  # Text16Ptr
 message_current_len = 0x0744  # Int32 || 0x0758, 0x077C
 
-# 0x0764, 0x0768, 0x076C, 0x0770 POSITION OF CHAT BOX?
+# 0x0764, 0x0768, 0x076C, 0x0770 [position of chat box]
 
 # ·····································································
 
@@ -43,7 +43,7 @@ gold_max = 0x1B98  # Float
 # MANAGERS
 minion_manager = 0x24ED788  # [<League of Legends.exe> + 0x24ED788]
 champion_manager = 0x18A0014  # [<League of Legends.exe> + 0x18A0014]
-turret_manager = 0x3134C94  # [<League of Legends.exe> + 0x3134C94]
+tower_manager = 0x3134C94  # [<League of Legends.exe> + 0x3134C94]
 # inhibitor_manager = 0x2FB6B8C
 # missile_manager = 0x313D2B4
 
@@ -70,6 +70,15 @@ health = 0x0E74  # Float
 health_max = 0x0E84  # Float
 name = 0x2D5C  # Text8Ptr
 is_dead_ofuscated_n = 0x0288  # Int8: 0, 2 = alive; 1, 3 = dead
-is_dead_ofuscated_1 = 0x0290  # ? changes when dead
-is_dead_ofuscated_3 = 0x0298  # ? changes when dead
+is_dead_ofuscated_1 = 0x0290  # ? sends hex to nvwgf2um.dll
+is_dead_ofuscated_3 = 0x0298  # ? sends hex to nvwgf2um.dll
 level = 0x353C  # Int32
+recall_state = 0x0D90  # 6 = normal; 11 = herald/baron
+
+
+# ·····································································
+
+# MISCELLANEOUS
+audio_manager = 0x189FF7C  # [<League of Legends.exe> + 0x189FF7C]
+# 0x002C, 0x0038 [audio manager list len?]
+# 0x0014, 0x0058, 0x0084 [lists]
