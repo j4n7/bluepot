@@ -6,7 +6,7 @@ from .chat import Chat
 from .entity import Entity
 from .entitymanager import EntityManager
 
-
+from src.functions import parse_time
 import data.offsets as offsets
 
 
@@ -21,13 +21,14 @@ with open(data_dir / 'jungle_camps.json') as json_file:
 
 for monster_name, monster_info in jungle_monsters.items():
     monster_info['is_dead'] = True
-    monster_info['death_time'] = '00:00'
+    monster_info['death_time'] = parse_time('00:00')
     monster_info['spawn_time'] = ''
 
 for camp_name, camp_info in jungle_camps.items():
     camp_info['is_dead'] = True
-    camp_info['death_time'] = '00:00'
+    camp_info['death_time'] = parse_time('00:00')
     camp_info['spawn_time'] = ''
+    camp_info['timer'] = None
 
 
 class Game:
@@ -99,6 +100,22 @@ class Game:
                     camp_stored_info['death_time'] = self.time
                     camp_stored_info['death_visible'] = camp_is_dead_visible
 
+    def _update_jungle_camp_timers(self):
+        for camp_name, camp_stored_info in self.jungle_camps_stored.items():
+            if camp_name != 'drake':
+                if camp_stored_info['is_dead']:
+                    initial_time = parse_time(camp_stored_info['initial_time'])
+                    # ! Breaks if camp is manually spawned in practice tool
+                    if self.time < initial_time:
+                        spawn_time = initial_time
+                    else:
+                        respawn_time = parse_time(camp_stored_info['respawn_time'])
+                        spawn_time = camp_stored_info['death_time'] + respawn_time
+                    camp_stored_info['timer'] = spawn_time - self.time
+                else:
+                    camp_stored_info['timer'] = None
+
     def update_jungle(self):
         self._update_jungle_monsters()
         self._update_jungle_camps()
+        self._update_jungle_camp_timers()

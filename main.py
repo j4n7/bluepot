@@ -37,19 +37,15 @@ if __name__ == '__main__':
 
             if n <= n_iterations or not n_iterations:
                 game.update_jungle()
-                # print(game.jungle_monsters_stored['blue_blue'])
-                # print(game.jungle_monsters_stored['wolf_blue'])
-                # print(game.jungle_monsters_stored['wolf_mini_blue_1'])
-                # print(game.jungle_monsters_stored['wolf_mini_blue_2'])
-                # print(game.jungle_camps_stored['blue_blue'])
-                # print(game.jungle_camps_stored['wolves_blue'])
-                # print(game.jungle_camps_stored['raptors_blue'])
-                # print()
+
+                # print('TIMERS')
+                # print('blue_blue', format_time(game.jungle_camps_stored['blue_blue']['timer']))
+                # print('wolves_blue', format_time(game.jungle_camps_stored['wolves_blue']['timer']))
+                # print('raptors_blue', format_time(game.jungle_camps_stored['raptors_blue']['timer']))
                 # print()
 
                 # print('GAME')
-                # print('Game time:', format_time(game.time.seconds))
-                # print()
+                # print('Game time:', format_time(game.time))
 
                 # print('CHAT')
                 # print('Is open?', game.chat.is_open)
