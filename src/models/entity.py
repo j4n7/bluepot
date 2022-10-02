@@ -1,5 +1,6 @@
 import json
 import math
+from pymem.exception import MemoryReadError
 from functools import cached_property
 from pathlib import Path
 
@@ -18,6 +19,7 @@ with open(data_dir / 'jungle_monsters.json') as json_file:
 
 class Entity:
     name_offset = offsets.name
+    name_verbose_offset = offsets.name_verbose
     position_offset = offsets.position
     health_offset = offsets.health
     health_max_offset = offsets.health_max
@@ -30,11 +32,22 @@ class Entity:
         self.address = address
 
     @cached_property
-    def name_memory(self):
+    def name_short(self):
         pointer = self.address + Entity.name_offset
-        name_memory_address = self.pm.read_int(pointer)
-        name_memory = self.pm.read_string(name_memory_address)
-        return name_memory
+        name_short_address = self.pm.read_int(pointer)
+        name_short = self.pm.read_string(name_short_address)
+        return name_short
+
+    @cached_property
+    def name_verbose(self):
+        try:
+            pointer = self.address + Entity.name_verbose_offset
+            name_verbose_address = self.pm.read_int(pointer)
+            name_verbose = self.pm.read_string(name_verbose_address)
+        except MemoryReadError:
+            name_verbose = None
+
+        return name_verbose
 
     @cached_property
     def name(self):
@@ -53,34 +66,41 @@ class Entity:
                     return True
                 return False
 
-            for name, monster_info in Entity.jungle_monsters_resapwns.items():
-                if _in_respawn_distance(self.position, monster_info['spawn_pos'], 2000):
-                    return name
+            for name, monster_info in Entity.jungle_monsters.items():
+                if self.name_verbose:
+                    if self.name_verbose == monster_info['name_verbose']:
+                        return name
+                else:
+                    if self.name_short == monster_info['name_short']:
+                        if _in_respawn_distance(self.position, monster_info['spawn_pos'], 2000):
+                            return name
 
     @cached_property
     def category(self):
         # TODO: all plants, wards and super-minions
-        if self.name_memory == 'PreSeason_Turret_Shield':
+        if self.name_short in [monster_info['name_short'] for monster_info in Entity.jungle_monsters.values()]:
+            return 'jungle_monster'
+        if self.name_short == 'PreSeason_Turret_Shield':
             return 'tower_shield'
-        if self.name_memory == 'SRU_PlantRespawnMarker':
+        if self.name_short == 'SRU_PlantRespawnMarker':
             return 'plant_respawn'
-        if self.name_memory == 'SRU_Plant_Health':
+        if self.name_short == 'SRU_Plant_Health':
             return 'plant_health'
-        if self.name_memory == 'SRU_OrderMinionMelee':
+        if self.name_short == 'SRU_OrderMinionMelee':
             return 'minion_melee_blue'
-        if self.name_memory == 'SRU_OrderMinionRanged':
+        if self.name_short == 'SRU_OrderMinionRanged':
             return 'minion_ranged_blue'
-        if self.name_memory == 'SRU_OrderMinionSiege':
+        if self.name_short == 'SRU_OrderMinionSiege':
             return 'minion_cannon_blue'
-        if self.name_memory == 'SRU_ChaosMinionMelee':
+        if self.name_short == 'SRU_ChaosMinionMelee':
             return 'minion_melee_red'
-        if self.name_memory == 'SRU_ChaosMinionRanged':
+        if self.name_short == 'SRU_ChaosMinionRanged':
             return 'minion_ranged_red'
-        if self.name_memory == 'SRU_ChaosMinionSiege':
+        if self.name_short == 'SRU_ChaosMinionSiege':
             return 'minion_cannon_red'
-        if self.name_memory == 'SRU_CampRespawnMarker':
+        if self.name_short == 'SRU_CampRespawnMarker':
             return 'jungle_camp_resapwn'
-        if self.name_memory == 'SRU_BaronSpawn':
+        if self.name_short == 'SRU_BaronSpawn':
             return 'baron_resapwn'
 
     @property
@@ -103,6 +123,10 @@ class Entity:
     @property
     def health_ratio(self):
         return self.health / self.health_max
+
+    @property
+    def is_dead(self):
+        return True if not self.health else False
 
     @property
     def interesting(self):

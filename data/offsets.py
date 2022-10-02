@@ -69,12 +69,12 @@ mana_max = 0x02AC  # Float
 health = 0x0E74  # Float
 health_max = 0x0E84  # Float
 name = 0x2D5C  # Text8Ptr
+name_verbose = 0x0054  # Text8Ptr [Works only in multi camp monsters and towers]
 is_dead_ofuscated_n = 0x0288  # Int8: 0, 2 = alive; 1, 3 = dead
 is_dead_ofuscated_1 = 0x0290  # ? sends hex to nvwgf2um.dll
 is_dead_ofuscated_3 = 0x0298  # ? sends hex to nvwgf2um.dll
 level = 0x353C  # Int32
 recall_state = 0x0D90  # 6 = normal; 11 = herald/baron
-
 
 # ·····································································
 

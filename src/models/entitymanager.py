@@ -1,3 +1,5 @@
+from pymem.exception import MemoryReadError
+
 from src.models.entity import Entity
 
 
@@ -18,5 +20,8 @@ class EntityManager:
         for n in range(list_len):
             pointer_n = pointer_0 + 0x4 * n
             address_n = self.pm.read_int(pointer_n)
-            entity = Entity(self.pm, address_n)
-            yield entity
+            try:
+                entity = Entity(self.pm, address_n)
+                yield entity
+            except MemoryReadError:
+                '''Prevents error when minions are manually generated in practice tool'''

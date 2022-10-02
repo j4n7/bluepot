@@ -29,3 +29,15 @@ class Game:
     def time(self):
         seconds = self.pm.read_float(self.pm.base_address + Game.game_time_offset)
         return timedelta(seconds=seconds)
+
+    @property
+    def jungle_monsters(self):
+        for minion in self.minion_manager.entities:
+            if minion.category == 'jungle_monster':
+                yield minion
+
+    @property
+    def jungle_camp_respawns(self):
+        for minion in self.minion_manager.entities:
+            if minion.category == 'jungle_camp_resapwn':
+                yield minion
