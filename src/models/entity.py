@@ -10,21 +10,22 @@ import data.offsets as offsets
 base_dir = Path(__file__).parent.parent.parent
 data_dir = base_dir / 'data'
 
-with open(data_dir / 'jungle_camp_respawns.json') as json_file:
-    jungle_camps_resapwns = json.load(json_file)
-
 with open(data_dir / 'jungle_monsters.json') as json_file:
     jungle_monsters = json.load(json_file)
+
+with open(data_dir / 'jungle_camps.json') as json_file:
+    jungle_camps = json.load(json_file)
 
 
 class Entity:
     name_offset = offsets.name
     name_verbose_offset = offsets.name_verbose
     position_offset = offsets.position
+    is_visible_offset = offsets.is_visible
     health_offset = offsets.health
     health_max_offset = offsets.health_max
 
-    jungle_camps_resapwns = jungle_camps_resapwns
+    jungle_camps = jungle_camps
     jungle_monsters = jungle_monsters
 
     def __init__(self, pm, address):
@@ -53,7 +54,7 @@ class Entity:
     def name(self):
 
         if self.category == 'jungle_camp_resapwn':
-            for name, camp_info in Entity.jungle_camps_resapwns.items():
+            for name, camp_info in Entity.jungle_camps.items():
                 if self.position == camp_info['spawn_pos']:
                     return name
         elif self.category == 'jungle_monster':
@@ -109,6 +110,11 @@ class Entity:
         y = self.pm.read_float(self.address + Entity.position_offset + 0x8)
         z = self.pm.read_float(self.address + Entity.position_offset + 0x4)
         return {"x": x, "y": y, "z": z}
+
+    @property
+    def is_visible(self):
+        is_visible = self.pm.read_bool(self.address + Entity.is_visible_offset)
+        return is_visible
 
     @property
     def health(self):

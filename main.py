@@ -36,9 +36,20 @@ if __name__ == '__main__':
             n += 1
 
             if n <= n_iterations or not n_iterations:
-                print('GAME')
-                print('Game time:', format_time(game.time.seconds))
-                print()
+                game.update_jungle()
+                # print(game.jungle_monsters_stored['blue_blue'])
+                # print(game.jungle_monsters_stored['wolf_blue'])
+                # print(game.jungle_monsters_stored['wolf_mini_blue_1'])
+                # print(game.jungle_monsters_stored['wolf_mini_blue_2'])
+                # print(game.jungle_camps_stored['blue_blue'])
+                # print(game.jungle_camps_stored['wolves_blue'])
+                # print(game.jungle_camps_stored['raptors_blue'])
+                # print()
+                # print()
+
+                # print('GAME')
+                # print('Game time:', format_time(game.time.seconds))
+                # print()
 
                 # print('CHAT')
                 # print('Is open?', game.chat.is_open)
@@ -76,6 +87,7 @@ if __name__ == '__main__':
                 #     print('Name:', entity.name)
                 #     print('Name (verbose)', entity.name_verbose)
                 #     print('Position:', entity.position)
+                #     print('Is visible?', entity.is_visible)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
                 #     print('Is dead?', entity.is_dead)
                 #     print()
