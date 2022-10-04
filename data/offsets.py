@@ -56,7 +56,15 @@ minimap_hud = 0x313383C  # [<League of Legends.exe> + 0x313383C]
 minimap_hud_size_min = 0x0040  # Float
 minimap_hud_size_max = 0x0044  # Float
 minimap_hud_size = 0x0048  # Float: 0.75 - 1.5
+
 minimap_hud_layer = 0x0128  # Pointer
+minimap_hud_coord_neg_a = 0x0034  # Float
+minimap_hud_coord_neg_b = 0x0038  # Float
+minimap_hud_coord_neg_a = 0x003C  # Float
+minimap_hud_coord_neg_b = 0x0040  # Float
+minimap_hud_size_a = 0x0044  # Float || 0x004C
+minimap_hud_size_b = 0x0048  # Float || 0x0050
+
 # minimap_hud_layer_pos = 0x3C
 
 # ·····································································

@@ -35,3 +35,14 @@ def format_time(delta):
         min, sec = divmod(delta.seconds, 60)
         return '%02d:%02d' % (min, sec)
     return None
+
+
+def format_timer(time_string):
+    if time_string:
+        min, sec = time_string.split(':')
+        min = int(min)
+        if min:
+            return str(min) + ':' + sec
+        else:
+            return str(int(sec))
+    return None

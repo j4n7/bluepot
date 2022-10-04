@@ -1,6 +1,7 @@
 from pymem import Pymem
 
 from src.models.game import Game
+from src.minimapoverlay import MinimapOverlay
 from src.functions import is_game_live, format_time
 
 
@@ -35,8 +36,11 @@ if __name__ == '__main__':
         if game:
             n += 1
 
-            if n <= n_iterations or not n_iterations:
-                game.update_jungle()
+            minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
+            minimap_overlay.run()
+
+            # if n <= n_iterations or not n_iterations:
+                # game.update_jungle()
 
                 # print('TIMERS')
                 # print('blue_blue', format_time(game.jungle_camps_stored['blue_blue']['timer']))

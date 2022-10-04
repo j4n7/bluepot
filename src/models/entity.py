@@ -24,6 +24,7 @@ class Entity:
     is_visible_offset = offsets.is_visible
     health_offset = offsets.health
     health_max_offset = offsets.health_max
+    is_dead_offset = offsets.is_dead_ofuscated_n
 
     jungle_camps = jungle_camps
     jungle_monsters = jungle_monsters
@@ -133,6 +134,11 @@ class Entity:
     @property
     def is_dead(self):
         return True if not self.health else False
+
+    # @property
+    # def is_dead(self):
+    #     is_dead = self.pm.read_int(self.address + Entity.is_dead_offset)
+    #     return True if is_dead % 2 != 0 else False
 
     @property
     def interesting(self):
