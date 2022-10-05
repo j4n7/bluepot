@@ -43,13 +43,6 @@ if __name__ == '__main__':
             minimap_overlay.run()
 
             # if n <= n_iterations or not n_iterations:
-                # game.update_jungle()
-
-                # print('TIMERS')
-                # print('blue_blue', format_time(game.jungle_camps_stored['blue_blue']['timer']))
-                # print('wolves_blue', format_time(game.jungle_camps_stored['wolves_blue']['timer']))
-                # print('raptors_blue', format_time(game.jungle_camps_stored['raptors_blue']['timer']))
-                # print()
 
                 # print('GAME')
                 # print('Game time:', format_time(game.time))
@@ -64,10 +57,12 @@ if __name__ == '__main__':
                 # print()
 
                 # print('PLAYER')
-                # print('Memory addresss:', hex(game.local_player.address))
+                # print('Memory addresss:', hex(game.local_player.address))         
                 # print('Name (short):', game.local_player.name_short)
                 # print('Position:', game.local_player.position)
+                # print('Is visible?', hex(game.local_player.address))
                 # print('Health:', f'{round(game.local_player.health, 2)}/{round(game.local_player.health_max, 2)} ({round(game.local_player.health_ratio, 2)})')
+                # print('Is dead?', game.local_player.is_dead)
                 # print()
 
                 # print('MINIONS & JUNGLE MONSTERS')
