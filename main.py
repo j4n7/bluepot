@@ -15,6 +15,7 @@ if __name__ == '__main__':
 
     pm = None
     game = None
+    minimap_overlay = None
     waiting_message = True
     while True:
         if is_game_live():
@@ -25,10 +26,12 @@ if __name__ == '__main__':
         else:
             pm = None
             game = None
+            if minimap_overlay:
+                minimap_overlay.root.destroy()
+            minimap_overlay = None
             if waiting_message:
                 print('\nWaiting for game...')
             waiting_message = False
-
         if pm and not game:
             game = Game(pm)
             n = 0

@@ -4,6 +4,8 @@ import win32gui
 import win32con
 import win32api
 
+from pymem.exception import ProcessError, MemoryReadError
+
 from src.functions import format_time, format_timer
 
 
@@ -102,27 +104,22 @@ class MinimapOverlay:
 
     def set_proportions(self):
         # ! This shouldn't be hard coded
-        game_resolution = f"{self.game_resolution['width']}x{self.game_resolution['height']}"
-        if game_resolution == '1280x1024':
-            self.minimap_font_size = str(int(3.6 * self.minimap_resolution['width'] / 100))  # '7'
-            self.minimap_camps_positions = {
-                'gromp_blue': {'x': 0.15, 'y': 0.43},
-                'blue_blue': {'x': 0.265, 'y': 0.47},
-                'wolves_blue': {'x': 0.261, 'y': 0.57},
-                'raptors_blue': {'x': 0.46, 'y': 0.63},
-                'red_blue': {'x': 0.527, 'y': 0.73},
-                'krugs_blue': {'x': 0.58, 'y': 0.817}
-            }
-        elif game_resolution == '1920x1080':
-            self.minimap_font_size = '7'
-            self.minimap_camps_positions = {
-                'gromp_blue': {'x': 0.15, 'y': 0.43},
-                'blue_blue': {'x': 0.265, 'y': 0.47},
-                'wolves_blue': {'x': 0.26, 'y': 0.57},
-                'raptors_blue': {'x': 0.46, 'y': 0.63},
-                'red_blue': {'x': 0.526, 'y': 0.73},
-                'krugs_blue': {'x': 0.58, 'y': 0.815}
-            }
+        # game_resolution == '1280x1024', map_resolution = 242x242 (33 = ingame)
+        self.minimap_font_size = '8'
+        self.minimap_camps_positions = {
+            'gromp_blue': {'x': 0.15, 'y': 0.43},
+            'blue_blue': {'x': 0.265, 'y': 0.47},
+            'wolves_blue': {'x': 0.261, 'y': 0.57},
+            'raptors_blue': {'x': 0.46, 'y': 0.63},
+            'red_blue': {'x': 0.527, 'y': 0.73},
+            'krugs_blue': {'x': 0.58, 'y': 0.817},
+            'gromp_red': {'x': 1.01 - 0.15, 'y': 1 - 0.43},
+            'blue_red': {'x': 1.01 - 0.265, 'y': 1 - 0.47},
+            'wolves_red': {'x': 1.01 - 0.261, 'y': 1 - 0.57},
+            'raptors_red': {'x': 1.01 - 0.46, 'y': 0.99 - 0.63},
+            'red_red': {'x': 1.01 - 0.527, 'y': 1 - 0.73},
+            'krugs_red': {'x': 1.01 - 0.58, 'y': 1 - 0.817}
+        }
 
     def set_camp_position(self, ratio):
         return ratio * self.minimap_resolution['width']
@@ -149,14 +146,18 @@ class MinimapOverlay:
             label.place(x=self.set_camp_position(position['x']), y=self.set_camp_position(position['y']), anchor='center')
 
     def update_labels(self):
-        for camp_name, camp_stored_info in self.get_new_text_callback().items():
-            if camp_name in self.minimap_camps_positions:
-                text = getattr(self, f"{camp_name}_text")
-                text.set('')
-                if camp_stored_info['timer']:
-                    time = format_timer(format_time(camp_stored_info['timer']))
-                    if time != '0':  # Exclude 0 seconds
-                        text.set(time)
+        try:
+            for camp_name, camp_stored_info in self.get_new_text_callback().items():
+                if camp_name in self.minimap_camps_positions:
+                    text = getattr(self, f"{camp_name}_text")
+                    text.set('')
+                    if camp_stored_info['timer']:
+                        time = format_timer(format_time(camp_stored_info['timer']))
+                        if time != '0':  # Exclude 0 seconds
+                            text.set(time)
+        except ProcessError or MemoryReadError:
+            '''Game finished!'''
+            self.root.quit()
 
         self.root.after(1, self.update_labels)
 

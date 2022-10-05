@@ -42,12 +42,16 @@ class Entity:
 
     @cached_property
     def name_verbose(self):
+        name_verbose = None
         try:
             pointer = self.address + Entity.name_verbose_offset
             name_verbose_address = self.pm.read_int(pointer)
-            name_verbose = self.pm.read_string(name_verbose_address)
+            try:
+                name_verbose = self.pm.read_string(name_verbose_address)
+            except UnicodeDecodeError:
+                pass
         except MemoryReadError:
-            name_verbose = None
+            pass
 
         return name_verbose
 
