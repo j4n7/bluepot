@@ -153,8 +153,9 @@ class MinimapOverlay:
                     text.set('')
                     if camp_stored_info['timer']:
                         time = format_timer(format_time(camp_stored_info['timer']))
-                        if time != '0':  # Exclude 0 seconds
-                            text.set(time)
+                        if len(time) <= 5:  # ! Patching some errors (e.g., 1349:00)
+                            if time != '0':  # Exclude 0 seconds
+                                text.set(time)
         except ProcessError or MemoryReadError:
             '''Game finished!'''
             self.root.quit()

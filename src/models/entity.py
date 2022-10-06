@@ -78,6 +78,10 @@ class Entity:
                         return name
                 else:
                     if self.name_short == monster_info['name_short']:
+                        # * Take out mini krugs that appear when killing the ancient krug
+                        # * They don't have a verbose name
+                        if self.name_short == 'SRU_KrugMini':
+                            return 'krug_mini_child'
                         if _in_respawn_distance(self.position, monster_info['spawn_pos'], 2000):
                             return name
 
@@ -135,14 +139,15 @@ class Entity:
     def health_ratio(self):
         return self.health / self.health_max
 
-    @property
-    def is_dead(self):
-        return True if not self.health else False
-
     # @property
     # def is_dead(self):
-    #     is_dead = self.pm.read_int(self.address + Entity.is_dead_offset)
-    #     return True if is_dead % 2 != 0 else False
+    #     return True if not self.health else False
+
+    @property
+    def is_dead(self):
+        # * Superior approach
+        is_dead = self.pm.read_int(self.address + Entity.is_dead_offset)
+        return True if is_dead % 2 != 0 else False
 
     @property
     def interesting(self):

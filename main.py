@@ -39,6 +39,8 @@ if __name__ == '__main__':
         if game:
             n += 1
 
+            # game.update_jungle()
+
             minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
             minimap_overlay.run()
 

@@ -24,6 +24,7 @@ for monster_name, monster_info in jungle_monsters.items():
     monster_info['is_dead'] = True
     monster_info['death_time'] = None
     monster_info['spawn_time'] = None
+    monster_info['death_visible'] = None
 
 for camp_name, camp_info in jungle_camps.items():
     camp_info['is_dead'] = True
@@ -96,6 +97,7 @@ class Game:
                         if not jungle_monster.is_dead and jungle_monster_stored['is_dead']:
                             jungle_monster_stored['is_dead'] = False
                             jungle_monster_stored['spawn_time'] = self.time
+                            jungle_monster_stored['death_visible'] = None
                         # MONSTER DEAD
                         elif jungle_monster.is_dead and not jungle_monster_stored['is_dead']:
                             jungle_monster_stored['is_dead'] = True
@@ -107,8 +109,20 @@ class Game:
 
     def _update_jungle_camps(self):
         spawn_offset = timedelta(seconds=1)
+
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             if camp_name != 'drake':
+
+                # The all() function returns True if all items in an iterable are true, otherwise it returns False.
+                camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
+                camp_is_death_visible = all([self.jungle_monsters_stored[monster]['death_visible'] for monster in camp_stored_info['monsters']])
+
+                # ! Fairly accurate, krugs are the most problematic
+                vision_offset = timedelta(seconds=0)
+                if not camp_is_death_visible:
+                    vision_offset = timedelta(seconds=4)
+                    if camp_name in ['krugs_blue', 'krugs_red']:
+                        vision_offset = timedelta(seconds=6)
 
                 initial_time = parse_time(camp_stored_info['initial_time'])
                 respawn_time = parse_time(camp_stored_info['respawn_time'])
@@ -120,13 +134,10 @@ class Game:
                     # ! A camp that has not spawned doesn't have a death time
                     # ! It gives an error trying to sum <None> and <timedelta>
                     try:
-                        spawning_time = camp_stored_info['death_time'] + respawn_time + spawn_offset
+                        spawning_time = camp_stored_info['death_time'] + respawn_time + spawn_offset - vision_offset
                     except TypeError:
                         spawning_time = initial_time + spawn_offset
                 timer = spawning_time.total_seconds() - self.time.total_seconds()
-
-                # The all() function returns True if all items in an iterable are true, otherwise it returns False.
-                camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
 
                 # * Monsters (threfore camps) can appear in memory before they really spawn ingame
                 # * Timers needs to reach 0 for a camp to be really declared as spawned
@@ -137,22 +148,28 @@ class Game:
                 if not camp_is_dead and camp_stored_info['is_dead']:
                     camp_stored_info['is_dead'] = False
                     camp_stored_info['spawn_time'] = self.time
+                    camp_stored_info['death_visible'] = None
                 # CAMP DEAD
                 elif camp_is_dead and not camp_stored_info['is_dead']:
-                    camp_is_dead_visible = all([self.jungle_monsters_stored[monster]['death_visible'] for monster in camp_stored_info['monsters']])
                     camp_stored_info['is_dead'] = True
                     camp_stored_info['death_time'] = self.time
-                    camp_stored_info['death_visible'] = camp_is_dead_visible
+                    camp_stored_info['death_visible'] = camp_is_death_visible
 
                 if camp_stored_info['is_dead']:
-                    camp_stored_info['timer'] = timedelta(seconds=timer)
+                    if not camp_is_death_visible:
+                        if camp_name in ['blue_blue', 'red_blue', 'blue_red', 'red_red'] and timer > 60.0:
+                            camp_stored_info['timer'] = None
+                        elif camp_name in ['gromp_blue', 'wolves_blue', 'raptors_blue', 'krugs_blue',
+                                           'gromp_red', 'wolves_red', 'raptors_red', 'krugs_red'] and timer > 10.0:
+                            camp_stored_info['timer'] = None
+                    else:
+                        camp_stored_info['timer'] = timedelta(seconds=timer)
                 else:
                     camp_stored_info['timer'] = None
 
     def update_jungle(self):
         self._update_jungle_monsters()
         self._update_jungle_camps()
-        # self._update_jungle_camp_timers()
 
     def get_jungle_camps(self):
         self.update_jungle()
