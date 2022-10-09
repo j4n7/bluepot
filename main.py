@@ -67,6 +67,14 @@ if __name__ == '__main__':
                 # print('Is dead?', game.local_player.is_dead)
                 # print()
 
+                # print('OBJECTS')
+                # for entity in game.object_manager.entities:
+                #     if not entity.name_verbose.startswith('Audio-Emitter') and not entity.name_verbose.startswith('SRU_River') and not entity.name_verbose.startswith('sru_River'):
+                #         print('OBJECT')
+                #         print('Memory addresss:', hex(entity.address))
+                #         print('Name (verbose)', entity.name_verbose)
+                #         print()
+
                 # print('MINIONS & JUNGLE MONSTERS')
                 # for entity in game.minion_manager.entities:
                 #     print('MINION')
@@ -102,6 +110,7 @@ if __name__ == '__main__':
                 #     print('Position:', entity.position)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
                 #     print('Is dead?', entity.is_dead)
+                #     print('Interesting', entity.interesting)
                 #     print()
 
                 # print('CHAMPIONS')

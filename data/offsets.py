@@ -46,6 +46,14 @@ tower_manager = 0x3132FDC  # [<League of Legends.exe> + 0x3132FDC]
 # inhibitor_manager = 0x2FB6B8C  # [!]
 # missile_manager = 0x313D2B4  # [!]
 
+# OBJECT MANAGER
+object_manager = 0x189E25C  # [<League of Legends.exe> + 0x189E25C]
+object_list = 0x0014  # Ptr
+object_last = 0x0020  # Ptr
+object_len = 0x002C  # Int32 || 0x0038
+
+object_name = 0X0054  # Text8Ptr
+
 # ·····································································
 
 # MINIMAP
@@ -81,10 +89,3 @@ recall_state = 0x0D90  # Int32 || 0x0D78 [6 = normal; 11 = herald/baron]
 name = 0x2D7C  # Text8Ptr
 name_verbose = 0x0054  # Text8Ptr [Works only in multi camp monsters and towers]
 level = 0x355C  # Int32
-
-# ·····································································
-
-# MISCELLANEOUS
-audio_manager = 0x189E25C  # [<League of Legends.exe> + 0x189E25C]
-# 0x002C, 0x0038 [audio manager list len?]
-# 0x0014, 0x0058, 0x0084 [lists]

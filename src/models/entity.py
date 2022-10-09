@@ -35,9 +35,16 @@ class Entity:
 
     @cached_property
     def name_short(self):
-        pointer = self.address + Entity.name_offset
-        name_short_address = self.pm.read_int(pointer)
-        name_short = self.pm.read_string(name_short_address)
+        name_short = None
+        try:
+            pointer = self.address + Entity.name_offset
+            name_short_address = self.pm.read_int(pointer)
+            try:
+                name_short = self.pm.read_string(name_short_address)
+            except UnicodeDecodeError:
+                pass                
+        except MemoryReadError:
+            '''Entity from object manager'''
         return name_short
 
     @cached_property

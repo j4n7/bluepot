@@ -6,6 +6,7 @@ from pymem.exception import MemoryReadError
 from .chat import Chat
 from .entity import Entity
 from .entitymanager import EntityManager
+from .objectmanager import ObjectManager
 
 from src.functions import parse_time
 import data.offsets as offsets
@@ -55,6 +56,8 @@ class Game:
         self.minion_manager = EntityManager(pm, Game.minion_manager_offset)
         self.champion_manager = EntityManager(pm, Game.champion_manager_offset)
         self.tower_manager = EntityManager(pm, Game.tower_manager_offsset)
+
+        self.object_manager = ObjectManager(pm)
 
         self.jungle_camps_stored = jungle_camps
         self.jungle_monsters_stored = jungle_monsters
