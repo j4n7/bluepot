@@ -1,4 +1,5 @@
 from pymem import Pymem
+import timeit
 
 from src.models.game import Game
 from src.minimapoverlay import MinimapOverlay
@@ -45,6 +46,21 @@ if __name__ == '__main__':
             minimap_overlay.run()
 
             # if n <= n_iterations or not n_iterations:
+
+            #     # TIMERS
+            #     timer_setup = 'from __main__ import game'
+            #     timer_minion_manager = timeit.timeit(setup=timer_setup, stmt='game.minion_manager', number=100)
+            #     timer_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game.jungle_monsters', number=100)
+            #     timer__update_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_monsters()', number=100)
+            #     timer__update_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_camps()', number=100)
+            #     timer_get_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game.get_jungle_camps()', number=100)
+
+            #     print('Time: minion_manager', round(timer_minion_manager * 1000 * 1000, 2), 'μs')
+            #     print('Time: jungle_monsters', round(timer_jungle_monsters * 1000 * 1000, 2), 'μs')
+            #     print('Time: _update_jungle_monster', round(timer__update_jungle_monsters, 2), 's')
+            #     print('Time: _update_jungle_camps', round(timer__update_jungle_camps, 2), 's')
+            #     print('Time: get_jungle_camps()', round(timer_get_jungle_camps, 2), 's')
+            #     print()
 
                 # print('GAME')
                 # print('Game time:', format_time(game.time))
