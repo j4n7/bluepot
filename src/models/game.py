@@ -130,6 +130,7 @@ class Game:
                 initial_time = parse_time(camp_stored_info['initial_time'])
                 respawn_time = parse_time(camp_stored_info['respawn_time'])
 
+                initial_spawn = False
                 if self.time.total_seconds() <= initial_time.total_seconds():
                     spawning_time = initial_time + spawn_offset
                 else:
@@ -138,6 +139,7 @@ class Game:
                     # ! It gives an error trying to sum <None> and <timedelta>
                     try:
                         spawning_time = camp_stored_info['death_time'] + respawn_time + spawn_offset - vision_offset
+                        initial_spawn = True
                     except TypeError:
                         spawning_time = initial_time + spawn_offset
                 timer = spawning_time.total_seconds() - self.time.total_seconds()
@@ -159,7 +161,7 @@ class Game:
                     camp_stored_info['death_visible'] = camp_is_death_visible
 
                 if camp_stored_info['is_dead']:
-                    if not camp_is_death_visible:
+                    if initial_spawn and not camp_is_death_visible:
                         if camp_name in ['blue_blue', 'red_blue', 'blue_red', 'red_red'] and timer > 60.0:
                             camp_stored_info['timer'] = None
                         elif camp_name in ['gromp_blue', 'wolves_blue', 'raptors_blue', 'krugs_blue',
