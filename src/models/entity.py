@@ -22,6 +22,8 @@ class Entity:
     name_verbose_offset = offsets.name_verbose
     position_offset = offsets.position
     is_visible_offset = offsets.is_visible
+    mana_offset = offsets.mana
+    mana_max_offset = offsets.mana_max
     health_offset = offsets.health
     health_max_offset = offsets.health_max
     is_dead_offset = offsets.is_dead_ofuscated_n
@@ -132,6 +134,21 @@ class Entity:
         is_visible = self.pm.read_bool(self.address + Entity.is_visible_offset)
         return is_visible
 
+
+    @property
+    def mana(self):
+        mana = self.pm.read_float(self.address + Entity.mana_offset)
+        return mana
+
+    @cached_property
+    def mana_max(self):
+        mana_max = self.pm.read_float(self.address + Entity.mana_max_offset)
+        return mana_max
+
+    @property
+    def mana_ratio(self):
+        return self.mana / self.mana_max
+
     @property
     def health(self):
         health = self.pm.read_float(self.address + Entity.health_offset)
@@ -158,9 +175,14 @@ class Entity:
 
     @property
     def interesting(self):
-        a = self.pm.read_int(self.address + 0x00FC)  # 2 byte (0-3)
-        b = self.pm.read_int(self.address + 0x0100)
-        c = self.pm.read_int(self.address + 0x01B8)  # small number
-        d = self.pm.read_int(self.address + 0x3C4)
+        # Some others: 0x00F3, 0x00F8, 0x00FC
 
-        return (a, b, c, d)
+        fast_8 = self.pm.read_uchar(self.address + 0x01B8)  # UInt8
+        fast_16 = self.pm.read_ushort(self.address + 0x01B8)  # Uint16
+        fast_32 = self.pm.read_uint(self.address + 0x01B8)  # Uint32
+
+        slow_8 = self.pm.read_uchar(self.address + 0x01B9)
+
+        expiry_time = self.pm.read_uint(self.address + 0x0298)
+
+        return {'fast_8': fast_8, 'fast_16': fast_16, 'fast_32': fast_32, 'slow_8': slow_8, 'expiry_time': expiry_time}

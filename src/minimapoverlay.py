@@ -9,6 +9,7 @@ from pymem.exception import ProcessError, MemoryReadError
 from src.functions import format_time, format_timer
 
 
+# https://github.com/notatallshaw/fall_guys_ping_estimate
 # https://stackoverflow.com/questions/16726050/how-do-we-get-the-border-size-of-a-window
 # https://stackoverflow.com/questions/67544105/click-through-tkinter-windows
 # https://stackoverflow.com/questions/70149724/tkinter-canvas-without-white-background-make-it-transparent

@@ -1,5 +1,6 @@
 from pymem import Pymem
 import timeit
+import time
 
 from src.models.game import Game
 from src.minimapoverlay import MinimapOverlay
@@ -19,6 +20,8 @@ if __name__ == '__main__':
     minimap_overlay = None
     waiting_message = True
     while True:
+        # start_time = time.perf_counter()
+
         if is_game_live():
             if not pm:
                 pm = Pymem('League of Legends.exe')
@@ -42,25 +45,38 @@ if __name__ == '__main__':
 
             # game.update_jungle()
 
+            # MEASURE LOOP TIME
+            # end_time = time.perf_counter()
+            # elpased_time = end_time - start_time
+            # time_to_sleep = max(Game.server_tick_time - elpased_time, 0)
+
+            # print('Elapsed time:', elpased_time)
+            # print('Time to sleep:', time_to_sleep)
+
+            # time.sleep(time_to_sleep)
+
+            # MINIMAP OVERLAY
+            # ? Here loop halts till Tkinter instance ends
+            # ? Nothing gets executed later
             minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
             minimap_overlay.run()
 
             # if n <= n_iterations or not n_iterations:
 
-            #     # TIMERS
-            #     timer_setup = 'from __main__ import game'
-            #     timer_minion_manager = timeit.timeit(setup=timer_setup, stmt='game.minion_manager', number=100)
-            #     timer_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game.jungle_monsters', number=100)
-            #     timer__update_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_monsters()', number=100)
-            #     timer__update_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_camps()', number=100)
-            #     timer_get_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game.get_jungle_camps()', number=100)
+                # PERFORMANCE TIMERS
+                # timer_setup = 'from __main__ import game'
+                # timer_minion_manager = timeit.timeit(setup=timer_setup, stmt='game.minion_manager', number=100)
+                # timer_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game.jungle_monsters', number=100)
+                # timer__update_jungle_monsters = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_monsters()', number=100)
+                # timer__update_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game._update_jungle_camps()', number=100)
+                # timer_get_jungle_camps = timeit.timeit(setup=timer_setup, stmt='game.get_jungle_camps()', number=100)
 
-            #     print('Time: minion_manager', round(timer_minion_manager * 1000 * 1000, 2), 'μs')
-            #     print('Time: jungle_monsters', round(timer_jungle_monsters * 1000 * 1000, 2), 'μs')
-            #     print('Time: _update_jungle_monster', round(timer__update_jungle_monsters, 2), 's')
-            #     print('Time: _update_jungle_camps', round(timer__update_jungle_camps, 2), 's')
-            #     print('Time: get_jungle_camps()', round(timer_get_jungle_camps, 2), 's')
-            #     print()
+                # print('Time: minion_manager', round(timer_minion_manager * 1000 * 1000, 2), 'μs')
+                # print('Time: jungle_monsters', round(timer_jungle_monsters * 1000 * 1000, 2), 'μs')
+                # print('Time: _update_jungle_monster', round(timer__update_jungle_monsters, 2), 's')
+                # print('Time: _update_jungle_camps', round(timer__update_jungle_camps, 2), 's')
+                # print('Time: get_jungle_camps()', round(timer_get_jungle_camps, 2), 's')
+                # print()
 
                 # print('GAME')
                 # print('Game time:', format_time(game.time))
@@ -80,6 +96,7 @@ if __name__ == '__main__':
                 # print('Position:', game.local_player.position)
                 # print('Is visible?', hex(game.local_player.address))
                 # print('Health:', f'{round(game.local_player.health, 2)}/{round(game.local_player.health_max, 2)} ({round(game.local_player.health_ratio, 2)})')
+                # print('Mana:', f'{round(game.local_player.mana, 2)}/{round(game.local_player.mana_max, 2)} ({round(game.local_player.mana_ratio, 2)})')
                 # print('Is dead?', game.local_player.is_dead)
                 # print()
 

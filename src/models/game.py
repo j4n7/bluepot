@@ -47,6 +47,8 @@ class Game:
     champion_manager_offset = offsets.champion_manager
     tower_manager_offsset = offsets.tower_manager
 
+    server_tick_time = 0.033  # https://leagueoflegends.fandom.com/wiki/Tick_and_updates
+
     def __init__(self, pm):
         self.pm = pm
         self.chat = Chat(pm)
