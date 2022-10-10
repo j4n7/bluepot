@@ -49,10 +49,21 @@ tower_manager = 0x3132FDC  # [<League of Legends.exe> + 0x3132FDC]
 # OBJECT MANAGER
 object_manager = 0x189E25C  # [<League of Legends.exe> + 0x189E25C]
 object_list = 0x0014  # Ptr
+object_list_len = 0x002C  # Int32 || 0x0038
 object_last = 0x0020  # Ptr
-object_len = 0x002C  # Int32 || 0x0038
 
+# ...Object
 object_name = 0X0054  # Text8Ptr
+
+# BUFF MANAGER
+buff_manager = 0x2330
+buff_list_start = 0x0010  # Ptr
+buff_list_end = 0x0014  # Ptr
+
+# ...Buff
+buff_name = 0x0008  # Ptr [Trash objects dont't have a name]
+buff_start_time = 0x000C  # Float || 0x0018
+buff_end_time = 0x0010  # Float
 
 # ·····································································
 
@@ -86,6 +97,6 @@ mana_max = 0x02AC  # Float
 health = 0x0E74  # Float
 health_max = 0x0E84  # Float
 recall_state = 0x0D90  # Int32 || 0x0D78 [6 = normal; 11 = herald/baron]
-name = 0x2D7C  # Text8Ptr
+name = 0x2D7C  # Text8Ptr  || 0x3158
 name_verbose = 0x0054  # Text8Ptr [Works only in multi camp monsters and towers]
 level = 0x355C  # Int32

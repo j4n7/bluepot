@@ -43,7 +43,7 @@ if __name__ == '__main__':
         if game:
             n += 1
 
-            # game.update_jungle()
+            game.update_jungle()
 
             # MEASURE LOOP TIME
             # end_time = time.perf_counter()
@@ -58,8 +58,8 @@ if __name__ == '__main__':
             # MINIMAP OVERLAY
             # ? Here loop halts till Tkinter instance ends
             # ? Nothing gets executed later
-            minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
-            minimap_overlay.run()
+            # minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
+            # minimap_overlay.run()
 
             # if n <= n_iterations or not n_iterations:
 
@@ -98,6 +98,9 @@ if __name__ == '__main__':
                 # print('Health:', f'{round(game.local_player.health, 2)}/{round(game.local_player.health_max, 2)} ({round(game.local_player.health_ratio, 2)})')
                 # print('Mana:', f'{round(game.local_player.mana, 2)}/{round(game.local_player.mana_max, 2)} ({round(game.local_player.mana_ratio, 2)})')
                 # print('Is dead?', game.local_player.is_dead)
+                # print('Buffs:')
+                # for buff in game.local_player.buff_manager.buffs:
+                #     print(f'... {buff.name}: start [{buff.start_time}] -  end [{buff.end_time}] - duration [{buff.duration}]')
                 # print()
 
                 # print('OBJECTS')
@@ -141,9 +144,9 @@ if __name__ == '__main__':
                 #     print('Name (short):', entity.name_short)
                 #     print('Name:', entity.name)
                 #     print('Position:', entity.position)
-                #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
-                #     print('Is dead?', entity.is_dead)
-                #     print('Interesting', entity.interesting)
+                #     print('Buffs:')
+                #     for buff in entity.buff_manager.buffs:
+                #         print(f'... {buff.name}: start [{buff.start_time}] -  end [{buff.end_time}] - duration [{buff.duration}]')
                 #     print()
 
                 # print('CHAMPIONS')

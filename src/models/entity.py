@@ -4,6 +4,7 @@ from pymem.exception import MemoryReadError
 from functools import cached_property
 from pathlib import Path
 
+from src.models.buffmanager import BuffManager
 import data.offsets as offsets
 
 
@@ -34,6 +35,10 @@ class Entity:
     def __init__(self, pm, address):
         self.pm = pm
         self.address = address
+
+    @cached_property
+    def buff_manager(self):
+        return BuffManager(self.pm, self.address)
 
     @cached_property
     def name_short(self):
