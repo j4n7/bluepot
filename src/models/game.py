@@ -174,9 +174,50 @@ class Game:
                 else:
                     camp_stored_info['timer'] = None
 
+    def _update_jungle_camp_respawns(self):
+        '''This method is more efficient when updating the status of jungle camps'''
+        jungle_camp_respawns = {camp_respawn.name: camp_respawn for camp_respawn in self.jungle_camp_respawns}
+        for camp_name, camp_stored_info in self.jungle_camps_stored.items():
+            # BEFORE FIRST RESPAWN
+            initial_time = parse_time(camp_stored_info['initial_time'])
+            if self.time.total_seconds() < initial_time.total_seconds():
+                spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                timer = initial_time.total_seconds() + spawn_offset.total_seconds() - self.time.total_seconds()
+                camp_stored_info['timer'] = timedelta(seconds=timer)
+            # AFTER FIRST RESPAWN
+            else:
+                # CAMP DEAD
+                if camp_name in jungle_camp_respawns.keys():
+                    # Only store info once after the camp is cleared
+                    # ! Killing Ancient Krug creates a respawn marker, but Medium Krug can still be alive
+                    # TODO: find a way to adjust Krug camp respawning time
+                    if not camp_stored_info['is_dead']:
+                        camp_stored_info['is_dead'] = True
+                        camp_respawn = jungle_camp_respawns[camp_name]
+                        for buff in camp_respawn.buff_manager.buffs:
+                            if buff.name == 'camprespawncountdownhidden':
+                                camp_stored_info['death_time'] = buff.start_time
+                                camp_stored_info['spawn_time'] = buff.end_time
+                                break
+
+                    spawn_offset = timedelta(seconds=61)  # ? Correct time disadjustment
+                    try:
+                        timer = camp_stored_info['spawn_time'].total_seconds() + spawn_offset.total_seconds() - self.time.total_seconds()
+                        camp_stored_info['timer'] = timedelta(seconds=timer)
+                    except AttributeError:
+                        '''Error at first spawn (no stored time yet)'''
+                        camp_stored_info['timer'] = None
+                # CAMP ALIVE
+                else:
+                    camp_stored_info['is_dead'] = False
+                    camp_stored_info['death_time'] = None
+                    camp_stored_info['spawn_time'] = None
+                    camp_stored_info['timer'] = None
+
     def update_jungle(self):
-        self._update_jungle_monsters()
-        self._update_jungle_camps()
+        # self._update_jungle_monsters()
+        # self._update_jungle_camps()
+        self._update_jungle_camp_respawns()
 
     def get_jungle_camps(self):
         self.update_jungle()

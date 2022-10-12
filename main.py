@@ -100,7 +100,7 @@ if __name__ == '__main__':
                 # print('Is dead?', game.local_player.is_dead)
                 # print('Buffs:')
                 # for buff in game.local_player.buff_manager.buffs:
-                #     print(f'... {buff.name}: start [{buff.start_time}] -  end [{buff.end_time}] - duration [{buff.duration}]')
+                #     print(f'... {buff.name}: start [{buff.start_time}] - end [{buff.end_time}] - duration [{buff.duration}]')
                 # print()
 
                 # print('OBJECTS')
@@ -134,6 +134,9 @@ if __name__ == '__main__':
                 #     print('Is visible?', entity.is_visible)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
                 #     print('Is dead?', entity.is_dead)
+                #     print('Buffs:')
+                #     for buff in entity.buff_manager.buffs:
+                #         print(f'... {buff.name}: start [{buff.start_time}] - end [{buff.end_time}] - duration [{buff.duration}]')
                 #     print()
 
                 # print('JUNGLE CAMP RESPAWNS')
@@ -146,7 +149,7 @@ if __name__ == '__main__':
                 #     print('Position:', entity.position)
                 #     print('Buffs:')
                 #     for buff in entity.buff_manager.buffs:
-                #         print(f'... {buff.name}: start [{buff.start_time}] -  end [{buff.end_time}] - duration [{buff.duration}]')
+                #         print(f'... {buff.name}: start [{buff.start_time}] - end [{buff.end_time}] - duration [{buff.duration}]')
                 #     print()
 
                 # print('CHAMPIONS')
