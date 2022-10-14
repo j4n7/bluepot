@@ -8,6 +8,7 @@
 		},
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["gromp_blue"]
 	},
 	"blue_blue": {
@@ -19,6 +20,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "05:00",
+		"timer_time": "01:00",
 		"monsters": ["blue_blue"]
 	},
 	"wolves_blue": {
@@ -30,6 +32,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["wolf_blue", "wolf_mini_blue_1", "wolf_mini_blue_2"]
 	},
 	"raptors_blue": {
@@ -41,6 +44,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["raptor_blue", "raptor_mini_blue_1", "raptor_mini_blue_2", "raptor_mini_blue_3", "raptor_mini_blue_4", "raptor_mini_blue_5"]
 	},
 	"red_blue": {
@@ -52,6 +56,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "05:00",
+		"timer_time": "01:00",
 		"monsters": ["red_blue"]
 	},
 	"krugs_blue": {
@@ -63,6 +68,7 @@
 		},
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["krug_blue", "krug_mini_blue"]
 	},
 	"gromp_red": {
@@ -74,6 +80,7 @@
 		},
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["gromp_red"]
 	},
 	"blue_red": {
@@ -85,6 +92,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "05:00",
+		"timer_time": "01:00",
 		"monsters": ["blue_red"]
 	},
 	"wolves_red": {
@@ -96,6 +104,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["wolf_red", "wolf_mini_red_1", "wolf_mini_red_2"]
 	},
 	"raptors_red": {
@@ -107,6 +116,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["raptor_red", "raptor_mini_red_1", "raptor_mini_red_2", "raptor_mini_red_3", "raptor_mini_red_4", "raptor_mini_red_5"]
 	},
 	"red_red": {
@@ -118,6 +128,7 @@
 		},
 		"initial_time": "01:30",
 		"respawn_time": "05:00",
+		"timer_time": "01:00",
 		"monsters": ["red_red"]
 	},
 	"krugs_red": {
@@ -129,6 +140,7 @@
 		},
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
+		"timer_time": "00:10",
 		"monsters": ["krug_red", "krug_mini_red"]
 	},
 	"scuttle_top": {
@@ -140,6 +152,7 @@
 		},
 		"initial_time": "03:15",
 		"respawn_time": "02:30",
+		"timer_time": "01:00",
 		"monsters": ["scuttle_top"]
 	},
 	"scuttle_bottom": {
@@ -151,6 +164,7 @@
 		},
 		"initial_time": "03:15",
 		"respawn_time": "02:30",
+		"timer_time": "01:00",
 		"monsters": ["scuttle_bottom"]
 	},
 	"drake": {
@@ -162,6 +176,7 @@
 		},
 		"initial_time": "05:00",
 		"respawn_time": "05:00",
+		"timer_time": "01:00",
 		"monsters": ["drake"]
 	},
 	"herald": {
@@ -173,6 +188,7 @@
 		},
 		"initial_time": "08:00",
 		"respawn_time": "06:00",
+		"timer_time": "01:00",
 		"monsters": ["herald"]
 	},
 	"baron": {
@@ -184,6 +200,7 @@
 		},
 		"initial_time": "20:00",
 		"respawn_time": "06:00",
+		"timer_time": "01:00",
 		"monsters": ["baron"]
 	}
 }

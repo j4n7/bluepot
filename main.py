@@ -43,7 +43,7 @@ if __name__ == '__main__':
         if game:
             n += 1
 
-            game.update_jungle()
+            # game.update_jungle()
 
             # MEASURE LOOP TIME
             # end_time = time.perf_counter()
@@ -58,8 +58,8 @@ if __name__ == '__main__':
             # MINIMAP OVERLAY
             # ? Here loop halts till Tkinter instance ends
             # ? Nothing gets executed later
-            # minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
-            # minimap_overlay.run()
+            minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
+            minimap_overlay.run()
 
             # if n <= n_iterations or not n_iterations:
 
