@@ -12,31 +12,6 @@ from src.functions import parse_time
 import data.offsets as offsets
 
 
-base_dir = Path(__file__).parent.parent.parent
-data_dir = base_dir / 'data'
-
-with open(data_dir / 'jungle_monsters.json') as json_file:
-    jungle_monsters = json.load(json_file)
-
-with open(data_dir / 'jungle_camps.json') as json_file:
-    jungle_camps = json.load(json_file)
-
-for monster_name, monster_info in jungle_monsters.items():
-    monster_info['is_dead'] = True
-    monster_info['death_time'] = None
-    monster_info['spawn_time'] = None
-    monster_info['death_visible'] = None
-
-for camp_name, camp_info in jungle_camps.items():
-    camp_info['is_dead'] = True
-    camp_info['death_time'] = None
-    camp_info['spawn_time'] = None
-    camp_info['timer'] = None
-    camp_info['initial_time'] = parse_time(camp_info['initial_time'])
-    camp_info['respawn_time'] = parse_time(camp_info['respawn_time'])
-    camp_info['timer_time'] = parse_time(camp_info['timer_time'])
-
-
 class Game:
     game_time_offset = offsets.game_time
 
@@ -64,8 +39,8 @@ class Game:
 
         self.object_manager = ObjectManager(pm)
 
-        self.jungle_camps_stored = jungle_camps
-        self.jungle_monsters_stored = jungle_monsters
+        self._init_jungle_monsters()
+        self._init_jungle_camps()
 
     @property
     def time(self):
@@ -94,169 +69,199 @@ class Game:
             if minion.category == 'jungle_camp_resapwn':
                 yield minion
 
+    def _init_jungle_monsters(self):
+        '''
+        Initialize the state of jungle monsters.
+        Read current monsters in memory: useful when reconnecting to a game that has already started.
+        Otherwise a monster can be alive and not be accounted when dying.
+        '''
+        base_dir = Path(__file__).parent.parent.parent
+        data_dir = base_dir / 'data'
+
+        with open(data_dir / 'jungle_monsters.json') as json_file:
+            self.jungle_monsters_stored = json.load(json_file)
+
+        for monster_name, monster_info in self.jungle_monsters_stored.items():
+            monster_info['is_dead'] = True
+            monster_info['death_time'] = None
+            monster_info['death_visible'] = None
+
+        for jungle_monster in self.jungle_monsters:
+            try:
+                if jungle_monster.name in self.jungle_monsters_stored:
+                    jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
+                    jungle_monster_stored['is_dead'] = False
+                    jungle_monster_stored['death_time'] = None
+                    jungle_monster_stored['death_visible'] = None
+            # ? Not sure if I need <UnicodeDecodeError> here
+            except MemoryReadError or UnicodeDecodeError:
+                pass
+
+    def _init_jungle_camps(self):
+        '''
+        Initialize the state of jungle camps.
+        In this case there is no need to read memory as next jungle update will get their real state.
+        '''
+        base_dir = Path(__file__).parent.parent.parent
+        data_dir = base_dir / 'data'
+
+        with open(data_dir / 'jungle_camps.json') as json_file:
+            self.jungle_camps_stored = json.load(json_file)
+
+        for camp_name, camp_info in self.jungle_camps_stored.items():
+            camp_info['is_dead'] = True
+            camp_info['death_time'] = None
+            camp_info['death_visible'] = None
+            camp_info['spawn_time'] = None
+            camp_info['timer'] = None
+
+            camp_info['initial_time'] = parse_time(camp_info['initial_time'])
+            camp_info['respawn_time'] = parse_time(camp_info['respawn_time'])
+            camp_info['timer_time'] = parse_time(camp_info['timer_time'])
+
     def _update_jungle_monsters(self):
         for jungle_monster in self.jungle_monsters:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
-                    # MONSTER SPAWNED
-                    if not jungle_monster.is_dead and jungle_monster_stored['is_dead']:
-                        jungle_monster_stored['is_dead'] = False
-                        jungle_monster_stored['death_time'] = None
-                        jungle_monster_stored['death_visible'] = None
                     # MONSTER DEAD
-                    elif jungle_monster.is_dead and not jungle_monster_stored['is_dead']:
+                    if jungle_monster.is_dead and not jungle_monster_stored['is_dead']:
                         jungle_monster_stored['is_dead'] = True
                         jungle_monster_stored['death_time'] = self.time
                         jungle_monster_stored['death_visible'] = jungle_monster.is_visible
+                    # MONSTER SPAWNED
+                    elif not jungle_monster.is_dead and jungle_monster_stored['is_dead']:
+                        jungle_monster_stored['is_dead'] = False
+                        jungle_monster_stored['death_time'] = None
+                        jungle_monster_stored['death_visible'] = None
             # ? Not sure if I need <UnicodeDecodeError> here
             except MemoryReadError or UnicodeDecodeError:
                 pass
 
     def _update_jungle_camps(self):
-        # TODO: This needs an update to resemble the structure of _update_jungle_camp_respawns()
-        spawn_offset = timedelta(seconds=1)
+        '''
+        Only updates cleared camps by player but updates all spawned camps.
+        This could be separeted in 2 different methods.
+        '''
+
+        def get_camp_is_death_visible(camp_is_dead, jungle_monsters, camp_monsters):
+            '''
+            Check if player has vision of the camp being cleared.
+            This should be True if player has vision of the last remaining monster being killed and not if all monsters were killed while having vision.
+            '''
+            if not camp_is_dead:
+                return False
+            camp_is_death_visible = all([jungle_monsters[monster]['death_visible'] for monster in camp_monsters])
+            if camp_is_death_visible:
+                return True
+            else:
+                monsters_death_time_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_visible']]
+                monsters_death_time_not_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if not jungle_monsters[monster]['death_visible']]
+
+                last_monster_death_time_visible = 0
+                last_monster_death_time_not_visible = 0
+
+                if monsters_death_time_visible:
+                    last_monster_death_time_visible = max(monsters_death_time_visible)
+                if monsters_death_time_not_visible:
+                    last_monster_death_time_not_visible = max(monsters_death_time_not_visible)
+
+                if last_monster_death_time_visible >= last_monster_death_time_not_visible:
+                    return True
+                else:
+                    return False
 
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             if camp_name != 'drake':
-
-                # The all() function returns True if all items in an iterable are true, otherwise it returns False.
-                camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
-                camp_is_death_visible = all([self.jungle_monsters_stored[monster]['death_visible'] for monster in camp_stored_info['monsters']])
-
-                # ! Fairly accurate, krugs are the most problematic
-                vision_offset = timedelta(seconds=0)
-                if not camp_is_death_visible:
-                    vision_offset = timedelta(seconds=4)
-                    if camp_name in ['krugs_blue', 'krugs_red']:
-                        vision_offset = timedelta(seconds=6)
-
                 initial_time = camp_stored_info['initial_time']
                 respawn_time = camp_stored_info['respawn_time']
-
-                initial_spawn = False
-                if self.time.total_seconds() <= initial_time.total_seconds():
-                    spawn_time = initial_time + spawn_offset
-                else:
-                    # ! A camp before its initial spawning time shouldn't reach this code
-                    # ! A camp that has not spawned doesn't have a death time
-                    # ! It gives an error trying to sum <None> and <timedelta>
-                    try:
-                        spawn_time = camp_stored_info['death_time'] + respawn_time + spawn_offset - vision_offset
-                        initial_spawn = True
-                    except TypeError:
-                        spawn_time = initial_time + spawn_offset
-                timer = spawn_time.total_seconds() - self.time.total_seconds()
-
-                # * Monsters (threfore camps) can appear in memory before they really spawn ingame
-                # * Timers needs to reach 0 for a camp to be really declared as spawned
-                if not camp_is_dead and timer > 0:
-                    camp_is_dead = True
-                
-                # CAMP SPAWNED
-                if not camp_is_dead and camp_stored_info['is_dead']:
-                    camp_stored_info['is_dead'] = False
-                    camp_stored_info['death_time'] = None
-                    camp_stored_info['death_visible'] = None
-                # CAMP DEAD
-                elif camp_is_dead and not camp_stored_info['is_dead']:
-                    camp_stored_info['is_dead'] = True
-                    camp_stored_info['death_time'] = self.time
-                    camp_stored_info['death_visible'] = camp_is_death_visible
-
-                if camp_stored_info['is_dead']:
-                    if initial_spawn and not camp_is_death_visible:
-                        if camp_name in ['blue_blue', 'red_blue', 'blue_red', 'red_red'] and timer > 60.0:
-                            camp_stored_info['timer'] = None
-                        elif camp_name in ['gromp_blue', 'wolves_blue', 'raptors_blue', 'krugs_blue',
-                                           'gromp_red', 'wolves_red', 'raptors_red', 'krugs_red'] and timer > 10.0:
-                            camp_stored_info['timer'] = None
-                    else:
-                        camp_stored_info['timer'] = timedelta(seconds=timer)
-                else:
-                    camp_stored_info['timer'] = None
+                if self.time.total_seconds() > initial_time.total_seconds():
+                    # The all() function returns True if all items in an iterable are true, otherwise it returns False.
+                    # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
+                    camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
+                    # camp_is_death_visible = all([self.jungle_monsters_stored[monster]['death_visible'] for monster in camp_stored_info['monsters']])
+                    camp_is_death_visible = get_camp_is_death_visible(camp_is_dead, self.jungle_monsters_stored, camp_stored_info['monsters'])
+                    # CAMP DEAD
+                    # * Only update jungle camps where player has vision of the camp being cleared
+                    if camp_is_dead and not camp_stored_info['is_dead'] and camp_is_death_visible:
+                        print('CAMP DEAD', camp_name, self.time)
+                        camp_stored_info['is_dead'] = True
+                        camp_stored_info['death_time'] = self.time
+                        camp_stored_info['death_visible'] = True
+                        spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                        camp_stored_info['spawn_time'] = camp_stored_info['death_time'] + respawn_time + spawn_offset
+                    # CAMP SPAWNED
+                    # * Update all jungle camps
+                    # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
+                    elif not camp_is_dead and camp_stored_info['is_dead']:
+                        # * Camps can spawn in memory before timer reaching 0 s
+                        if camp_stored_info['timer'] and camp_stored_info['timer'].total_seconds() > 0:
+                            continue
+                        print('CAMP SPAWNED', camp_name, self.time)
+                        camp_stored_info['is_dead'] = False
+                        camp_stored_info['death_time'] = None
+                        camp_stored_info['death_visible'] = None
+                        camp_stored_info['spawn_time'] = None
 
     def _update_jungle_camp_respawns(self):
         '''
-        This method is more efficient when updating the status of jungle camps.
+        Jungle camp respawn markers only appear in memory when player has vision of them.
+        Camps can be cleared by a player without vision of the respawn marker if monsters are pulled too much.
+        Therefore this method is only useful for camps cleared by enmies.
         Krug camp respawn timer is bugged by design (RIOT).
-        Measures are taken to compensate this error.
         '''
-        # TODO: check if monsters are alive but a respawn marker still exists (Practice Tool)
         jungle_camp_respawns = {camp_respawn.name: camp_respawn for camp_respawn in self.jungle_camp_respawns}
+        for camp_name, camp_stored_info in self.jungle_camps_stored.items():
+            if camp_name != 'drake':
+                # AFTER FIRST RESPAWN
+                initial_time = camp_stored_info['initial_time']
+                if self.time.total_seconds() > initial_time.total_seconds():
+                    # CAMP DEAD
+                    # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
+                    camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
+                    if camp_is_dead and camp_name in jungle_camp_respawns.keys() and not camp_stored_info['is_dead']:
+                        print('CAMP DEAD', camp_name, self.time)
+                        camp_stored_info['is_dead'] = True
+                        camp_respawn = jungle_camp_respawns[camp_name]
+                        for buff in camp_respawn.buff_manager.buffs:
+                            if buff.name == 'camprespawncountdownhidden':
+                                spawn_offset = timedelta(seconds=61)  # ? Correct time disadjustment
+                                camp_stored_info['death_time'] = buff.start_time
+                                camp_stored_info['spawn_time'] = buff.end_time + spawn_offset
+
+    def _update_jungle_timers(self):
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             # BEFORE FIRST RESPAWN
             initial_time = camp_stored_info['initial_time']
-            if self.time.total_seconds() < initial_time.total_seconds():
+            # TODO: check if monsters are manually spawned before initial time (Practice Tool)
+            if self.time.total_seconds() <= initial_time.total_seconds():
                 spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
                 timer = initial_time.total_seconds() + spawn_offset.total_seconds() - self.time.total_seconds()
                 camp_stored_info['timer'] = timedelta(seconds=timer)
             # AFTER FIRST RESPAWN
             else:
-                # CAMP DEAD (EXCEPT KRUG CAMP)
-                if camp_name in jungle_camp_respawns.keys():
-                    # Only store info once after the camp is cleared
-                    if not camp_stored_info['is_dead']:
-                        krug_mini = None
-                        if not camp_name.startswith('krugs'):
-                            camp_stored_info['is_dead'] = True
-                        else:
-                            # ! Killing Ancient Krug creates a respawn marker, but Medium Krug can still be alive
-                            color = camp_name[6:]
-                            krug_mini = self.jungle_monsters_stored[f'krug_mini_{color}']
-                            if krug_mini['is_dead']:
-                                camp_stored_info['is_dead'] = True
-                        if camp_stored_info['is_dead']:
-                            camp_respawn = jungle_camp_respawns[camp_name]
-                            for buff in camp_respawn.buff_manager.buffs:
-                                if buff.name == 'camprespawncountdownhidden':
-                                    spawn_offset = timedelta(seconds=61)  # ? Correct time disadjustment
-                                    camp_stored_info['death_time'] = buff.start_time
-                                    camp_stored_info['spawn_time'] = buff.end_time + spawn_offset                                    
-                            if krug_mini and krug_mini['death_time'] > camp_stored_info['death_time']:
-                                spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
-                                respawn_time = camp_stored_info['respawn_time']
-                                camp_stored_info['death_time'] = krug_mini['death_time']
-                                camp_stored_info['spawn_time'] = krug_mini['death_time'] + respawn_time + spawn_offset
-                            try:
-                                # ! Camps can be cleared without vision of respawn marker
-                                if self.time.total_seconds() - camp_stored_info['death_time'].total_seconds() < 0.05:
-                                    camp_stored_info['death_visible'] = True
-                                else:
-                                    camp_stored_info['death_visible'] = False
-                            except AttributeError:
-                                '''Happens when death_time is None, why?'''
+                if camp_stored_info['is_dead']:
                     try:
                         timer = camp_stored_info['spawn_time'].total_seconds() - self.time.total_seconds()
                         if camp_stored_info['death_visible']:
                             camp_stored_info['timer'] = timedelta(seconds=timer)
                         else:
-                            if timer <= camp_stored_info['timer_time'].total_seconds():
+                            if timer <= camp_stored_info['timer_time'].total_seconds() + 1:
                                 camp_stored_info['timer'] = timedelta(seconds=timer)
                             else:
                                 camp_stored_info['timer'] = None
                     except AttributeError:
                         '''Error at first spawn (no stored time yet)'''
                         camp_stored_info['timer'] = None
-                # CAMP ALIVE
                 else:
-                    # Krug camp respawn marker can disappear before spawn time
-                    if camp_name.startswith('krugs') and camp_stored_info['timer'] and camp_stored_info['timer'].total_seconds() > 0:
-                        timer = camp_stored_info['spawn_time'].total_seconds() - self.time.total_seconds()
-                        if timer < camp_stored_info['timer_time'].total_seconds():
-                            camp_stored_info['timer'] = timedelta(seconds=timer)
-                        else:
-                            camp_stored_info['timer'] = None
-                    else:
-                        camp_stored_info['is_dead'] = False
-                        camp_stored_info['death_time'] = None
-                        camp_stored_info['spawn_time'] = None
-                        camp_stored_info['timer'] = None
+                    camp_stored_info['timer'] = None
 
     def update_jungle(self):
+        '''The order of execution of these methods is non trivial.'''
         self._update_jungle_monsters()
+        self._update_jungle_camps()
         self._update_jungle_camp_respawns()
-        # self._update_jungle_camps()
+        self._update_jungle_timers()
 
     def get_jungle_camps(self):
         self.update_jungle()
