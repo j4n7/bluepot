@@ -140,8 +140,11 @@ class Game:
 
     def _update_jungle_camps(self):
         '''
-        Only updates cleared camps by player but updates all spawned camps.
-        This could be separeted in 2 different methods.
+        Only updates camps cleared by the player or an ally while having vision.
+        Updates all spawned camps.
+        Scuttle Crabs are an exception, they should't be updated even though player has vision of them being killed.
+        TODO: there is chance that player or an ally clears a camp without vision. Thus this method won't work.
+        TODO: this could be separeted in 2 different methods.
         '''
 
         def get_camp_is_death_visible(camp_is_dead, jungle_monsters, camp_monsters):
@@ -155,8 +158,9 @@ class Game:
             if camp_is_death_visible:
                 return True
             else:
-                monsters_death_time_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_visible']]
-                monsters_death_time_not_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if not jungle_monsters[monster]['death_visible']]
+                # Monsters don't have a death time before first spawn
+                monsters_death_time_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_time'] and jungle_monsters[monster]['death_visible']]
+                monsters_death_time_not_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_time'] and not jungle_monsters[monster]['death_visible']]
 
                 last_monster_death_time_visible = 0
                 last_monster_death_time_not_visible = 0
@@ -166,61 +170,72 @@ class Game:
                 if monsters_death_time_not_visible:
                     last_monster_death_time_not_visible = max(monsters_death_time_not_visible)
 
-                if last_monster_death_time_visible >= last_monster_death_time_not_visible:
+                if last_monster_death_time_visible == 0 and last_monster_death_time_not_visible == 0:
+                    return False
+                elif last_monster_death_time_visible >= last_monster_death_time_not_visible:
                     return True
                 else:
                     return False
 
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             if camp_name != 'drake':
-                initial_time = camp_stored_info['initial_time']
                 respawn_time = camp_stored_info['respawn_time']
-                if self.time.total_seconds() > initial_time.total_seconds():
-                    # The all() function returns True if all items in an iterable are true, otherwise it returns False.
-                    # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
-                    camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
-                    # camp_is_death_visible = all([self.jungle_monsters_stored[monster]['death_visible'] for monster in camp_stored_info['monsters']])
-                    camp_is_death_visible = get_camp_is_death_visible(camp_is_dead, self.jungle_monsters_stored, camp_stored_info['monsters'])
-                    # CAMP DEAD
-                    # * Only update jungle camps where player has vision of the camp being cleared
-                    if camp_is_dead and not camp_stored_info['is_dead'] and camp_is_death_visible:
-                        print('CAMP DEAD', camp_name, self.time)
-                        camp_stored_info['is_dead'] = True
-                        camp_stored_info['death_time'] = self.time
-                        camp_stored_info['death_visible'] = True
-                        spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
-                        camp_stored_info['spawn_time'] = camp_stored_info['death_time'] + respawn_time + spawn_offset
-                    # CAMP SPAWNED
-                    # * Update all jungle camps
-                    # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
-                    elif not camp_is_dead and camp_stored_info['is_dead']:
-                        # * Camps can spawn in memory before timer reaching 0 s
-                        if camp_stored_info['timer'] and camp_stored_info['timer'].total_seconds() > 0:
-                            continue
-                        print('CAMP SPAWNED', camp_name, self.time)
-                        camp_stored_info['is_dead'] = False
-                        camp_stored_info['death_time'] = None
-                        camp_stored_info['death_visible'] = None
-                        camp_stored_info['spawn_time'] = None
+                # The all() function returns True if all items in an iterable are true, otherwise it returns False.
+                # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
+                camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
+                camp_is_death_visible = get_camp_is_death_visible(camp_is_dead, self.jungle_monsters_stored, camp_stored_info['monsters'])
+                # CAMP DEAD
+                # * Only update jungle camps where player has vision of the camp being cleared
+                if camp_name not in ['scuttle_top', 'scuttle_bottom'] and camp_is_dead and not camp_stored_info['is_dead'] and camp_is_death_visible:
+                    # print('CAMP DEAD (PLAYER VISION)', camp_name, self.time)
+                    camp_stored_info['is_dead'] = True
+                    camp_stored_info['death_time'] = self.time
+                    camp_stored_info['death_visible'] = True
+                    spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                    camp_stored_info['spawn_time'] = camp_stored_info['death_time'] + respawn_time + spawn_offset
+                # CAMP SPAWNED
+                # * Update all jungle camps
+                # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
+                elif not camp_is_dead and camp_stored_info['is_dead']:
+                    initial_time = camp_stored_info['initial_time']
+                    # * Camps can spawn in memory before timer reaching 0 s
+                    # TODO: check if monsters are manually spawned after initial time (Practice Tool)
+                    if camp_stored_info['timer'] and self.time.total_seconds() > initial_time.total_seconds() and camp_stored_info['timer'].total_seconds() > 0:
+                        continue
+                    # print('CAMP SPAWNED', camp_name, self.time)
+                    camp_stored_info['is_dead'] = False
+                    camp_stored_info['death_time'] = None
+                    camp_stored_info['death_visible'] = None
+                    camp_stored_info['spawn_time'] = None
 
     def _update_jungle_camp_respawns(self):
         '''
-        Jungle camp respawn markers only appear in memory when player has vision of them.
+        Jungle camp respawn markers only appear in memory when the player or an ally has vision of them.
+        This doesn't apply for Scuttle Crabs when they have 'camprespawncountdownvisible' buff, they are visible to anyone.
         Camps can be cleared by a player without vision of the respawn marker if monsters are pulled too much.
-        Therefore this method is only useful for camps cleared by enmies.
+        Therefore this method is only useful for Scuttle Crabs and camps cleared by enemies.
         Krug camp respawn timer is bugged by design (RIOT).
         '''
         jungle_camp_respawns = {camp_respawn.name: camp_respawn for camp_respawn in self.jungle_camp_respawns}
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             if camp_name != 'drake':
-                # AFTER FIRST RESPAWN
-                initial_time = camp_stored_info['initial_time']
-                if self.time.total_seconds() > initial_time.total_seconds():
-                    # CAMP DEAD
-                    # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
-                    camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
-                    if camp_is_dead and camp_name in jungle_camp_respawns.keys() and not camp_stored_info['is_dead']:
-                        print('CAMP DEAD', camp_name, self.time)
+                # CAMP DEAD
+                # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
+                camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
+                if camp_is_dead and camp_name in jungle_camp_respawns.keys() and not camp_stored_info['is_dead']:
+                    if camp_name in ['scuttle_top', 'scuttle_bottom']:
+                        camp_respawn = jungle_camp_respawns[camp_name]
+                        for buff in camp_respawn.buff_manager.buffs:
+                            if buff.name == 'camprespawncountdownvisible':
+                                # * Death is registered only 1 minute before Scuttle respawns
+                                # print('CRAB DEAD', camp_name, self.time)
+                                camp_stored_info['is_dead'] = True
+                                spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                                camp_stored_info['death_time'] = buff.end_time - camp_stored_info['respawn_time']
+                                camp_stored_info['spawn_time'] = buff.end_time + spawn_offset
+                                break
+                    else:
+                        # print('CAMP DEAD (NO PLAYER VISION)', camp_name, self.time)
                         camp_stored_info['is_dead'] = True
                         camp_respawn = jungle_camp_respawns[camp_name]
                         for buff in camp_respawn.buff_manager.buffs:
@@ -228,33 +243,28 @@ class Game:
                                 spawn_offset = timedelta(seconds=61)  # ? Correct time disadjustment
                                 camp_stored_info['death_time'] = buff.start_time
                                 camp_stored_info['spawn_time'] = buff.end_time + spawn_offset
+                                break
 
     def _update_jungle_timers(self):
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
-            # BEFORE FIRST RESPAWN
-            initial_time = camp_stored_info['initial_time']
-            # TODO: check if monsters are manually spawned before initial time (Practice Tool)
-            if self.time.total_seconds() <= initial_time.total_seconds():
+            # BEFORE FIRST SPAWN
+            if camp_stored_info['is_dead'] and not camp_stored_info['death_time']:
                 spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                initial_time = camp_stored_info['initial_time']
                 timer = initial_time.total_seconds() + spawn_offset.total_seconds() - self.time.total_seconds()
                 camp_stored_info['timer'] = timedelta(seconds=timer)
-            # AFTER FIRST RESPAWN
-            else:
-                if camp_stored_info['is_dead']:
-                    try:
-                        timer = camp_stored_info['spawn_time'].total_seconds() - self.time.total_seconds()
-                        if camp_stored_info['death_visible']:
-                            camp_stored_info['timer'] = timedelta(seconds=timer)
-                        else:
-                            if timer <= camp_stored_info['timer_time'].total_seconds() + 1:
-                                camp_stored_info['timer'] = timedelta(seconds=timer)
-                            else:
-                                camp_stored_info['timer'] = None
-                    except AttributeError:
-                        '''Error at first spawn (no stored time yet)'''
-                        camp_stored_info['timer'] = None
+            # AFTER FIRST SPAWN
+            elif camp_stored_info['is_dead'] and camp_stored_info['death_time']:
+                timer = camp_stored_info['spawn_time'].total_seconds() - self.time.total_seconds()
+                if camp_stored_info['death_visible']:
+                    camp_stored_info['timer'] = timedelta(seconds=timer)
                 else:
-                    camp_stored_info['timer'] = None
+                    if timer <= camp_stored_info['timer_time'].total_seconds() + 1:
+                        camp_stored_info['timer'] = timedelta(seconds=timer)
+                    else:
+                        camp_stored_info['timer'] = None
+            else:
+                camp_stored_info['timer'] = None
 
     def update_jungle(self):
         '''The order of execution of these methods is non trivial.'''
