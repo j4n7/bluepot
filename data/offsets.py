@@ -1,18 +1,18 @@
 # ·····································································
 
-# Version 12.20
+# Version 12.21
 # Comment out offsets with [!] seem not to be working
 
 # ·····································································
 
 # GAME
 
-game_time = 0x31260D8  # Float
+game_time = 0x3152068  # Float
 
 # ·····································································
 
 # CHAT
-chat = 0x312D968  # [<League of Legends.exe> + 0x312D968]
+chat = 0x3158930  # [<League of Legends.exe> + 0x3158930]
 
 # CHAT ATTRIBUTES
 times_open = 0x6D8  # Int32 [0 = chat closed]
@@ -30,7 +30,7 @@ message_current_len = 0x06BC  # Int32 || 0x06D0, 0x06F4
 # ·····································································
 
 # LOCAL PLAYER
-local_player = 0x312D8CC  # [<League of Legends.exe> + 0x312D8CC]
+local_player = 0x3157F40  # [<League of Legends.exe> + 0x3157F40]
 
 # LOCAL PLAYER ATTRIBUTES
 local_player_summoner_name_start = 0x0054  # Text8[len]
@@ -41,14 +41,14 @@ gold_max = 0x1BB8  # Float
 # ·····································································
 
 # MANAGERS
-minion_manager = 0x24DD710  # [<League of Legends.exe> + 0x24DD710]
-champion_manager = 0x188FE14  # [<League of Legends.exe> + 0x188FE14]
-tower_manager = 0x3124C1C  # [<League of Legends.exe> + 0x3124C1C]
-missile_manager = 0x312D904  # [<League of Legends.exe> + 0x312D904]
-# inhibitor_manager = 0x313D514  # [!]
+minion_manager = 0x25095CC  # [<League of Legends.exe> + 0x25095CC]
+champion_manager = 0x18BBF40  # [<League of Legends.exe> + 0x18BBF40]
+tower_manager = 0x315089C  # [<League of Legends.exe> + 0x315089C]
+missile_manager = 0x31588D0  # [<League of Legends.exe> + 0x31588D0]
+# inhibitor_manager = 0x25095CC  # [!]
 
 # OBJECT MANAGER
-object_manager = 0x188FD7C  # [<League of Legends.exe> + 0x188FD7C]
+object_manager = 0x18BBEA8  # [<League of Legends.exe> + 0x18BBEA8]
 object_list = 0x0014  # Ptr
 object_list_len = 0x002C  # Int32 || 0x0038
 object_last = 0x0020  # Ptr
@@ -69,7 +69,7 @@ buff_end_time = 0x0010  # Float
 # ·····································································
 
 # MINIMAP
-minimap_hud = 0x312611C  # [<League of Legends.exe> + 0x312611C]
+minimap_hud = 0x31520AC  # [<League of Legends.exe> + 0x31520AC]
 
 # MINIMAP ATTRIBUTES
 minimap_hud_pos = 0x003C  # Int32 [left = 65793, right = 257, maybe coords?]
@@ -77,7 +77,7 @@ minimap_hud_size_min = 0x0040  # Float
 minimap_hud_size_max = 0x0044  # Float
 minimap_hud_size = 0x0048  # Float: 0.75 - 1.5
 
-minimap_hud_layer = 0x0138  # Pointer
+minimap_hud_layer = 0x0150  # Pointer
 minimap_hud_coord_neg_a = 0x0034  # Float
 minimap_hud_coord_neg_b = 0x0038  # Float
 minimap_hud_coord_neg_a = 0x003C  # Float
@@ -99,5 +99,5 @@ mana_max = 0x02AC  # Float
 health = 0x0E74  # Float
 health_max = 0x0E84  # Float
 recall_state = 0x0D90  # Int32 || 0x0D78 [6 = normal; 11 = herald/baron]
-name = 0x2D9C  # Text8Ptr || 0x3178
+name = 0x2DA4  # Text8Ptr || 0x3180
 level = 0x3584  # Int32
