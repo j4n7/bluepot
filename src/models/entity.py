@@ -49,7 +49,7 @@ class Entity:
             try:
                 name_short = self.pm.read_string(name_short_address)
             except UnicodeDecodeError:
-                pass                
+                pass
         except MemoryReadError:
             '''Entity from object manager'''
         return name_short

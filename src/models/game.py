@@ -8,7 +8,7 @@ from .entity import Entity
 from .entitymanager import EntityManager
 from .objectmanager import ObjectManager
 
-from src.functions import parse_time
+from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
@@ -41,6 +41,10 @@ class Game:
 
         self._init_jungle_monsters()
         self._init_jungle_camps()
+
+    @property
+    def events(self):
+        return get_game_events()
 
     @property
     def time(self):
@@ -138,6 +142,48 @@ class Game:
             except MemoryReadError or UnicodeDecodeError:
                 pass
 
+    def _update_jungle_epic_camps(self):
+        # ? Using troys (spawn and death sounds) can perhaps make this method more accurate
+        for camp_name, camp_stored_info in self.jungle_camps_stored.items():
+            if camp_name in ['drake', 'herald', 'baron']:
+                if camp_name == 'drake':
+                    camp_is_dead = all([monster_stored_info['is_dead'] for monster_name, monster_stored_info in self.jungle_monsters_stored.items() if monster_name.startswith('drake')])
+                else:
+                    camp_is_dead = self.jungle_monsters_stored[camp_name]['is_dead']
+                # CAMP DEAD
+                if camp_is_dead and not camp_stored_info['is_dead']:
+                    # print('CAMP DEAD', camp_name, self.time)
+                    spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
+                    if camp_name == 'drake':
+                        drake_death_count = get_drake_death_count()
+                        if drake_death_count['blue'] >= 4 or drake_death_count['red'] >= 4:
+                            spawn_offset = timedelta(seconds=61)  # * Elder dragon
+                    death_time = get_death_time(camp_name)
+                    respawn_time = camp_stored_info['respawn_time']
+                    spawn_time = death_time + respawn_time + spawn_offset
+                    camp_stored_info['is_dead'] = True
+                    camp_stored_info['death_time'] = death_time
+                    camp_stored_info['death_visible'] = None
+                    camp_stored_info['spawn_time'] = spawn_time
+                # CAMP SPAWNED
+                elif not camp_is_dead and camp_stored_info['is_dead']:
+                    # print('CAMP SPAWNED', camp_name, self.time)
+                    initial_time = camp_stored_info['initial_time']
+                    threshold = 10
+                    # * Camps can spawn in memory before timer reaching 0 s (around 7 s before they should)
+                    # * Camps manually spawned within threshold time will have to wait to be accounted (Practice Tool)
+                    if (
+                        camp_stored_info['timer']
+                        and self.time.total_seconds() > initial_time.total_seconds()
+                        and camp_stored_info['timer'].total_seconds() < threshold
+                        and camp_stored_info['timer'].total_seconds() > 0
+                       ):
+                        continue
+                    camp_stored_info['is_dead'] = False
+                    camp_stored_info['death_time'] = None
+                    camp_stored_info['death_visible'] = None
+                    camp_stored_info['spawn_time'] = None
+
     def _update_jungle_camps(self):
         '''
         Only updates camps cleared by the player or an ally while having vision.
@@ -159,8 +205,10 @@ class Game:
                 return True
             else:
                 # Monsters don't have a death time before first spawn
-                monsters_death_time_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_time'] and jungle_monsters[monster]['death_visible']]
-                monsters_death_time_not_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if jungle_monsters[monster]['death_time'] and not jungle_monsters[monster]['death_visible']]
+                monsters_death_time_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if (jungle_monsters[monster]['death_time'] 
+                                                                                                                                       and jungle_monsters[monster]['death_visible'])]
+                monsters_death_time_not_visible = [jungle_monsters[monster]['death_time'].total_seconds() for monster in camp_monsters if (jungle_monsters[monster]['death_time']
+                                                                                                                                           and not jungle_monsters[monster]['death_visible'])]
 
                 last_monster_death_time_visible = 0
                 last_monster_death_time_not_visible = 0
@@ -178,7 +226,7 @@ class Game:
                     return False
 
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
-            if camp_name != 'drake':
+            if camp_name not in ['drake', 'herald', 'baron']:
                 respawn_time = camp_stored_info['respawn_time']
                 # The all() function returns True if all items in an iterable are true, otherwise it returns False.
                 # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
@@ -186,7 +234,12 @@ class Game:
                 camp_is_death_visible = get_camp_is_death_visible(camp_is_dead, self.jungle_monsters_stored, camp_stored_info['monsters'])
                 # CAMP DEAD
                 # * Only update jungle camps where player has vision of the camp being cleared
-                if camp_name not in ['scuttle_top', 'scuttle_bottom'] and camp_is_dead and not camp_stored_info['is_dead'] and camp_is_death_visible:
+                if (
+                    camp_name not in ['scuttle_top', 'scuttle_bottom']
+                    and camp_is_dead
+                    and not camp_stored_info['is_dead']
+                    and camp_is_death_visible
+                   ):
                     # print('CAMP DEAD (PLAYER VISION)', camp_name, self.time)
                     camp_stored_info['is_dead'] = True
                     camp_stored_info['death_time'] = self.time
@@ -198,9 +251,13 @@ class Game:
                 # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
                 elif not camp_is_dead and camp_stored_info['is_dead']:
                     initial_time = camp_stored_info['initial_time']
-                    # * Camps can spawn in memory before timer reaching 0 s
-                    # TODO: check if monsters are manually spawned after initial time (Practice Tool)
-                    if camp_stored_info['timer'] and self.time.total_seconds() > initial_time.total_seconds() and camp_stored_info['timer'].total_seconds() > 0:
+                    threshold = 10
+                    if (
+                        camp_stored_info['timer']
+                        and self.time.total_seconds() > initial_time.total_seconds()
+                        and camp_stored_info['timer'].total_seconds() < threshold
+                        and camp_stored_info['timer'].total_seconds() > 0
+                       ):
                         continue
                     # print('CAMP SPAWNED', camp_name, self.time)
                     camp_stored_info['is_dead'] = False
@@ -218,7 +275,7 @@ class Game:
         '''
         jungle_camp_respawns = {camp_respawn.name: camp_respawn for camp_respawn in self.jungle_camp_respawns}
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
-            if camp_name != 'drake':
+            if camp_name not in ['drake', 'herald', 'baron']:
                 # CAMP DEAD
                 # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
                 camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
@@ -246,6 +303,8 @@ class Game:
                                 break
 
     def _update_jungle_timers(self):
+        # ! Timers for epic monsters are a bit off
+        # ! They also disapear before reaching 0 s during first spawn
         for camp_name, camp_stored_info in self.jungle_camps_stored.items():
             # BEFORE FIRST SPAWN
             if camp_stored_info['is_dead'] and not camp_stored_info['death_time']:
@@ -256,7 +315,7 @@ class Game:
             # AFTER FIRST SPAWN
             elif camp_stored_info['is_dead'] and camp_stored_info['death_time']:
                 timer = camp_stored_info['spawn_time'].total_seconds() - self.time.total_seconds()
-                if camp_stored_info['death_visible']:
+                if camp_stored_info['death_visible'] or camp_name in ['drake', 'herald', 'baron']:
                     camp_stored_info['timer'] = timedelta(seconds=timer)
                 else:
                     if timer <= camp_stored_info['timer_time'].total_seconds() + 1:
@@ -269,6 +328,7 @@ class Game:
     def update_jungle(self):
         '''The order of execution of these methods is non trivial.'''
         self._update_jungle_monsters()
+        self._update_jungle_epic_camps()
         self._update_jungle_camps()
         self._update_jungle_camp_respawns()
         self._update_jungle_timers()

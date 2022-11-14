@@ -121,7 +121,10 @@ class MinimapOverlay:
             'red_red': {'x': 1.01 - 0.527, 'y': 1 - 0.73},
             'krugs_red': {'x': 1.01 - 0.58, 'y': 1 - 0.817},
             'scuttle_top': {'x': 0.30, 'y': 0.35},
-            'scuttle_bottom': {'x': 1.01 - 0.30, 'y': 1.01 - 0.36}
+            'scuttle_bottom': {'x': 1.01 - 0.30, 'y': 1.01 - 0.36},
+            'herald': {'x': 0.335, 'y': 0.30},
+            # 'baron': {'x': 0.335, 'y': 0.30},
+            'drake': {'x': 1.01 - 0.335, 'y': 1.01 - 0.305},
         }
 
     def set_camp_position(self, ratio):

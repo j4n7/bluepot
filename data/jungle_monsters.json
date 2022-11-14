@@ -269,54 +269,54 @@
 			"z": -62.81019973754883
 		}
 	},
-	"dake_air": {
+	"drake_air": {
 		"name_short": "SRU_Dragon_Air",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Air",
 		"spawn_pos": {
 			"x": 9923.8955078125,
 			"y": 4407.755859375,
 			"z": -71.2406005859375
 		}
 	},
-	"dake_earth": {
+	"drake_earth": {
 		"name_short": "SRU_Dragon_Earth",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Earth",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
 			"z": -71.2406005859375
 		}
 	},
-	"dake_fire": {
+	"drake_fire": {
 		"name_short": "SRU_Dragon_Fire",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Fire",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
 			"z": -71.2406005859375
 		}
 	},
-	"dake_water": {
+	"drake_water": {
 		"name_short": "SRU_Dragon_Water",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Water",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
 			"z": -71.2406005859375
 		}
 	},
-	"dake_hextech": {
+	"drake_hextech": {
 		"name_short": "SRU_Dragon_Hextech",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Hextech",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
 			"z": -71.2406005859375
 		}
 	},
-	"dake_elder": {
+	"drake_elder": {
 		"name_short": "SRU_Dragon_Elder",
-		"name_verbose": "",
+		"name_verbose": "SRU_Dragon_Elder",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,

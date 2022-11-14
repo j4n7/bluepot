@@ -177,7 +177,7 @@
 		"initial_time": "05:00",
 		"respawn_time": "05:00",
 		"timer_time": "01:00",
-		"monsters": ["drake"]
+		"monsters": ["drake_air", "drake_earth", "drake_fire", "drake_water", "drake_hextech", "drake_elder"]
 	},
 	"herald": {
         "name_short": "SRU_CampRespawnMarker",

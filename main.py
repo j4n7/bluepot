@@ -108,7 +108,7 @@ if __name__ == '__main__':
                 #     if not entity.name_verbose.startswith('Audio-Emitter') and not entity.name_verbose.startswith('SRU_River') and not entity.name_verbose.startswith('sru_River'):
                 #         print('OBJECT')
                 #         print('Memory addresss:', hex(entity.address))
-                #         print('Name (verbose)', entity.name_verbose)
+                #         print('Name (verbose):', entity.name_verbose)
                 #         print()
 
                 # print('MINIONS & JUNGLE MONSTERS')
@@ -129,7 +129,7 @@ if __name__ == '__main__':
                 #     print('Category:', entity.category)
                 #     print('Name (short):', entity.name_short)
                 #     print('Name:', entity.name)
-                #     print('Name (verbose)', entity.name_verbose)
+                #     print('Name (verbose):', entity.name_verbose)
                 #     print('Position:', entity.position)
                 #     print('Is visible?', entity.is_visible)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
