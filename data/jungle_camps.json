@@ -162,7 +162,7 @@
 			"y": 5170.0,
 			"z": -62.81019973754883
 		},
-		"initial_time": "03:15",
+		"initial_time": "03:30",
 		"respawn_time": "02:30",
 		"timer_time": "01:00",
 		"monsters": ["scuttle_bottom"]
