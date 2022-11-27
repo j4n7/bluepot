@@ -7,12 +7,12 @@
 
 # GAME
 
-game_time = 0x3152068  # Float
+game_time = 0x313D244  # Float
 
 # ·····································································
 
 # CHAT
-chat = 0x3158930  # [<League of Legends.exe> + 0x3158930]
+chat = 0x3143E4C  # [<League of Legends.exe> + 0x3143E4C]
 
 # CHAT ATTRIBUTES
 times_open = 0x6D8  # Int32 [0 = chat closed]
@@ -41,14 +41,14 @@ gold_max = 0x1BB8  # Float
 # ·····································································
 
 # MANAGERS
-minion_manager = 0x25095CC  # [<League of Legends.exe> + 0x25095CC]
-champion_manager = 0x18BBF40  # [<League of Legends.exe> + 0x18BBF40]
-tower_manager = 0x315089C  # [<League of Legends.exe> + 0x315089C]
-missile_manager = 0x31588D0  # [<League of Legends.exe> + 0x31588D0]
-# inhibitor_manager = 0x25095CC  # [!]
+minion_manager = 0x24F45E0  # [<League of Legends.exe> + 0x24F45E0]
+champion_manager = 0x18A6F70  # [<League of Legends.exe> + 0x18A6F70]
+tower_manager = 0x313BA44  # [<League of Legends.exe> + 0x313BA44]
+missile_manager = 0x3143DF0  # [<League of Legends.exe> + 0x3143DF0]
+# inhibitor_manager = 0x3143EFC  # [!]
 
 # OBJECT MANAGER
-object_manager = 0x18BBEA8  # [<League of Legends.exe> + 0x18BBEA8]
+object_manager = 0x18A6ED8  # [<League of Legends.exe> + 0x18A6ED8]
 object_list = 0x0014  # Ptr
 object_list_len = 0x002C  # Int32 || 0x0038
 object_last = 0x0020  # Ptr
@@ -69,7 +69,7 @@ buff_end_time = 0x0010  # Float
 # ·····································································
 
 # MINIMAP
-minimap_hud = 0x31520AC  # [<League of Legends.exe> + 0x31520AC]
+minimap_hud = 0x313D288  # [<League of Legends.exe> + 0x313D288]
 
 # MINIMAP ATTRIBUTES
 minimap_hud_pos = 0x003C  # Int32 [left = 65793, right = 257, maybe coords?]
@@ -99,5 +99,5 @@ mana_max = 0x02AC  # Float
 health = 0x0E74  # Float
 health_max = 0x0E84  # Float
 recall_state = 0x0D90  # Int32 || 0x0D78 [6 = normal; 11 = herald/baron]
-name = 0x2DA4  # Text8Ptr || 0x3180
-level = 0x3584  # Int32
+name = 0x2DAC  # Text8Ptr || 0x3188
+level = 0x359C  # Int32
