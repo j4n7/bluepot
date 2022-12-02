@@ -72,10 +72,13 @@ def parse_time(time):
     return delta
 
 
-def format_time(delta):
+def format_time(delta, mode='min'):
     if delta:
         min, sec = divmod(delta.seconds, 60)
-        return '%02d:%02d' % (min, sec)
+        if mode == 'min':
+            return '%02d:%02d' % (min, sec)
+        elif mode == 'sec':
+            return f'{min}:{str(sec).zfill(2)}.{str(int(round(delta.microseconds / 10 ** 6, 1) * 10))[:1]}'
     return None
 
 

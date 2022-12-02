@@ -4,7 +4,8 @@ import time
 
 from src.models.game import Game
 from src.minimapoverlay import MinimapOverlay
-from src.functions import is_game_live, format_time
+from src.chronooverlay import ChronoOverlay
+from src.functions import is_game_live
 
 
 # Package structure as suggested by:
@@ -55,11 +56,16 @@ if __name__ == '__main__':
 
             # time.sleep(time_to_sleep)
 
-            # MINIMAP OVERLAY
             # ? Here loop halts till Tkinter instance ends
             # ? Nothing gets executed later
-            minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
-            minimap_overlay.run()
+            # MINIMAP OVERLAY
+            # minimap_overlay = MinimapOverlay(game.minimap_resolution, game.get_jungle_camps)
+            # minimap_overlay.run()
+
+            # JUNGLE CHRONO OVERLAY
+            chrono_overlay = ChronoOverlay(game)
+            chrono_overlay.run()
+            break
 
             # if n <= n_iterations or not n_iterations:
 
@@ -118,6 +124,7 @@ if __name__ == '__main__':
                 #     print('Category:', entity.category)
                 #     print('Name (short):', entity.name_short)
                 #     print('Name:', entity.name)
+                #     print('Name (verbose):', entity.name_verbose)
                 #     print('Position:', entity.position)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
                 #     print()
@@ -133,6 +140,7 @@ if __name__ == '__main__':
                 #     print('Position:', entity.position)
                 #     print('Is visible?', entity.is_visible)
                 #     print('Health:', f'{round(entity.health, 2)}/{round(entity.health_max, 2)} ({round(entity.health_ratio, 2)})')
+                #     print('Has been attacked?', entity.has_been_attacked)
                 #     print('Is dead?', entity.is_dead)
                 #     print('Buffs:')
                 #     for buff in entity.buff_manager.buffs:

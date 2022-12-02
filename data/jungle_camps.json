@@ -69,7 +69,7 @@
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
 		"timer_time": "00:10",
-		"monsters": ["krug_blue", "krug_mini_blue"]
+		"monsters": ["krug_ancient_blue", "krug_blue"]
 	},
 	"gromp_red": {
         "name_short": "SRU_CampRespawnMarker",
@@ -141,7 +141,7 @@
 		"initial_time": "01:42",
 		"respawn_time": "02:15",
 		"timer_time": "00:10",
-		"monsters": ["krug_red", "krug_mini_red"]
+		"monsters": ["krug_ancient_red", "krug_red"]
 	},
 	"scuttle_top": {
         "name_short": "SRU_CampRespawnMarker",

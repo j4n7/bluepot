@@ -107,7 +107,7 @@
 			"z": 53.956443786621094
 		}
 	},
-	"krug_blue": {
+	"krug_ancient_blue": {
 		"name_short": "SRU_Krug",
 		"name_verbose": "",
 		"spawn_pos": {
@@ -116,9 +116,18 @@
 			"z": 50.648094177246094
 		}
 	},
-	"krug_mini_blue": {
+	"krug_blue": {
 		"name_short": "SRU_KrugMini",
 		"name_verbose": "SRU_KrugMini5.1.2",
+		"spawn_pos": {
+			"x": 8394.76953125,
+			"y": 2641.590087890625,
+			"z": 50.7310676574707
+		}
+	},
+	"krug_mini_blue": {
+		"name_short": "SRU_KrugMiniMini",
+		"name_verbose": "",
 		"spawn_pos": {
 			"x": 8275.470703125,
 			"y": 2688.947998046875,
@@ -233,7 +242,7 @@
 			"z": 56.282676696777344
 		}
 	},
-	"krug_red": {
+	"krug_ancient_red": {
 		"name_short": "SRU_Krug",
 		"name_verbose": "",
 		"spawn_pos": {
@@ -242,12 +251,21 @@
 			"z": 56.47679901123047
 		}
 	},
-	"krug_mini_red": {
+	"krug_red": {
 		"name_short": "SRU_KrugMini",
 		"name_verbose": "SRU_KrugMini11.1.2",
 		"spawn_pos": {
 			"x": 6547.09228515625,
 			"y": 12156.4580078125,
+			"z": 56.47679901123047
+		}
+	},
+	"krug_mini_red": {
+		"name_short": "SRU_KrugMiniMini",
+		"name_verbose": "",
+		"spawn_pos": {
+			"x": 6499.490234375,
+			"y": 12287.3798828125,
 			"z": 56.47679901123047
 		}
 	},

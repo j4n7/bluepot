@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from datetime import timedelta
 from pathlib import Path
 from pymem.exception import MemoryReadError
@@ -8,7 +9,7 @@ from .entity import Entity
 from .entitymanager import EntityManager
 from .objectmanager import ObjectManager
 
-from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
+from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time, format_time
 import data.offsets as offsets
 
 
@@ -41,6 +42,8 @@ class Game:
 
         self._init_jungle_monsters()
         self._init_jungle_camps()
+
+        self._jungle_path = {}
 
     @property
     def events(self):
@@ -87,6 +90,7 @@ class Game:
 
         for monster_name, monster_info in self.jungle_monsters_stored.items():
             monster_info['is_dead'] = True
+            monster_info['attack_time'] = None
             monster_info['death_time'] = None
             monster_info['death_visible'] = None
 
@@ -95,6 +99,7 @@ class Game:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
                     jungle_monster_stored['is_dead'] = False
+                    jungle_monster_stored['attack_time'] = None
                     jungle_monster_stored['death_time'] = None
                     jungle_monster_stored['death_visible'] = None
             # ? Not sure if I need <UnicodeDecodeError> here
@@ -114,6 +119,7 @@ class Game:
 
         for camp_name, camp_info in self.jungle_camps_stored.items():
             camp_info['is_dead'] = True
+            camp_info['attack_time'] = None
             camp_info['death_time'] = None
             camp_info['death_visible'] = None
             camp_info['spawn_time'] = None
@@ -133,11 +139,17 @@ class Game:
                         jungle_monster_stored['is_dead'] = True
                         jungle_monster_stored['death_time'] = self.time
                         jungle_monster_stored['death_visible'] = jungle_monster.is_visible
-                    # MONSTER SPAWNED
-                    elif not jungle_monster.is_dead and jungle_monster_stored['is_dead']:
-                        jungle_monster_stored['is_dead'] = False
-                        jungle_monster_stored['death_time'] = None
-                        jungle_monster_stored['death_visible'] = None
+                    elif not jungle_monster.is_dead:
+                        # MONSTER SPAWNED
+                        if jungle_monster_stored['is_dead']:
+                            jungle_monster_stored['is_dead'] = False
+                            jungle_monster_stored['attack_time'] = None
+                            jungle_monster_stored['death_time'] = None
+                            jungle_monster_stored['death_visible'] = None
+                        # MONSTER ATTACKED
+                        elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked:
+                            jungle_monster_stored['attack_time'] = self.time
+
             # ? Not sure if I need <UnicodeDecodeError> here
             except MemoryReadError or UnicodeDecodeError:
                 pass
@@ -246,24 +258,34 @@ class Game:
                     camp_stored_info['death_visible'] = True
                     spawn_offset = timedelta(seconds=1)  # ? Correct time disadjustment
                     camp_stored_info['spawn_time'] = camp_stored_info['death_time'] + respawn_time + spawn_offset
-                # CAMP SPAWNED
-                # * Update all jungle camps
-                # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
-                elif not camp_is_dead and camp_stored_info['is_dead']:
-                    initial_time = camp_stored_info['initial_time']
-                    threshold = 10
-                    if (
-                        camp_stored_info['timer']
-                        and self.time.total_seconds() > initial_time.total_seconds()
-                        and camp_stored_info['timer'].total_seconds() < threshold
-                        and camp_stored_info['timer'].total_seconds() > 0
-                       ):
-                        continue
-                    # print('CAMP SPAWNED', camp_name, self.time)
-                    camp_stored_info['is_dead'] = False
-                    camp_stored_info['death_time'] = None
-                    camp_stored_info['death_visible'] = None
-                    camp_stored_info['spawn_time'] = None
+                elif not camp_is_dead:
+                    # CAMP SPAWNED
+                    # * Update all jungle camps
+                    # * When a player has had vision of a respawn marker, camp_is_dead should be accurate
+                    if camp_stored_info['is_dead']:
+                        initial_time = camp_stored_info['initial_time']
+                        threshold = 10
+                        if (
+                            camp_stored_info['timer']
+                            and self.time.total_seconds() > initial_time.total_seconds()
+                            and camp_stored_info['timer'].total_seconds() < threshold
+                            and camp_stored_info['timer'].total_seconds() > 0
+                        ):
+                            continue
+                        # print('CAMP SPAWNED', camp_name, self.time)
+                        camp_stored_info['is_dead'] = False
+                        camp_stored_info['death_time'] = None
+                        camp_stored_info['death_visible'] = None
+                        camp_stored_info['spawn_time'] = None
+                    # CAMP ATTACKED
+                    elif not camp_stored_info['is_dead'] and not camp_stored_info['attack_time']:
+                        camp_attack_times = [self.jungle_monsters_stored[monster]['attack_time'] for monster in camp_stored_info['monsters'] if self.jungle_monsters_stored[monster]['attack_time']]
+                        if camp_attack_times:
+                            camp_attack_time = None
+                            for attack_time in camp_attack_times:
+                                if not camp_attack_time or (attack_time.total_seconds() < camp_attack_time.total_seconds()):
+                                    camp_attack_time = attack_time
+                            camp_stored_info['attack_time'] = camp_attack_time
 
     def _update_jungle_camp_respawns(self):
         '''
@@ -325,6 +347,39 @@ class Game:
             else:
                 camp_stored_info['timer'] = None
 
+    def _get_jungle_path(self):
+        camps_untracked = ['scuttle_top', 'scuttle_bottom', 'drake', 'herald', 'baron']
+
+        camp_times = {camp: [info['attack_time'], info['death_time']] for camp, info in self.get_jungle_camps().items() if info['attack_time'] and camp not in camps_untracked}
+        camp_times = dict(sorted(camp_times.items(), key=lambda item: item[1][0].total_seconds()))
+
+        last_step_name = list(self._jungle_path)[-1] if self._jungle_path else None
+
+        for camp, info in camp_times.items():
+            if camp not in self._jungle_path and info[0]:
+                if not self._jungle_path:
+                    self.clear_start = info[0]
+                self._jungle_path[camp] = {'name': 'Gromp', 'color': '#72a7e8', 'start': info[0] - self.clear_start, 'end': None, 'total': None}
+                if last_step_name and 'moving' in last_step_name:
+                    self._jungle_path[last_step_name]['end'] = info[0] - self.clear_start
+                    self._jungle_path[last_step_name]['total'] = self._jungle_path[last_step_name]['end'] - self._jungle_path[last_step_name]['start']
+            elif camp in self._jungle_path and not self._jungle_path[camp]['end'] and info[1]:
+                self._jungle_path[camp]['end'] = info[1] - self.clear_start
+                self._jungle_path[camp]['total'] = self._jungle_path[camp]['end'] - self._jungle_path[camp]['start']
+
+        camps_cleared = True
+        for step_name, step_info in self._jungle_path.items():
+            if not step_info['end']:
+                camps_cleared = False
+
+        n_camp_steps = len([step_name for step_name, step_info in self._jungle_path.items() if 'moving' not in step_name])
+
+        if camps_cleared and n_camp_steps < 6 and last_step_name and 'moving' not in last_step_name:
+            n_moving_steps = len([step_name for step_name, step_info in self._jungle_path.items() if 'moving' in step_name])
+            death_times = [step_info['end'] for step_name, step_info in self._jungle_path.items()]
+            last_death_time = sorted(death_times, key=lambda time: time.total_seconds())[-1]
+            self._jungle_path[f'moving_{n_moving_steps + 1}'] = {'name': 'Moving', 'color': '', 'start': last_death_time, 'end': None, 'total': None}
+
     def update_jungle(self):
         '''The order of execution of these methods is non trivial.'''
         self._update_jungle_monsters()
@@ -336,3 +391,62 @@ class Game:
     def get_jungle_camps(self):
         self.update_jungle()
         return self.jungle_camps_stored
+
+    def reset_jungle(self):
+        for monster_name, monster_info in self.jungle_monsters_stored.items():
+            monster_info['is_dead'] = True
+            monster_info['attack_time'] = None
+            monster_info['death_time'] = None
+            monster_info['death_visible'] = None
+
+        for camp_name, camp_info in self.jungle_camps_stored.items():
+            camp_info['is_dead'] = True
+            camp_info['attack_time'] = None
+            camp_info['death_time'] = None
+            camp_info['death_visible'] = None
+            camp_info['spawn_time'] = None
+            camp_info['timer'] = None
+
+        self._jungle_path = {}
+
+    def get_jungle_chrono(self):
+        self._get_jungle_path()
+
+        def get_name_and_color(step_name):
+            name, color = step_name.split('_')
+            if name == 'moving':
+                name = '..........'
+                color = 'white'
+            if color == 'blue':
+                color = '#72A7E8'
+            elif color == 'red':
+                color = '#E87272'
+            return name.capitalize(), color
+
+        jungle_chrono = {}
+        n_step = 0
+        n_camps = 0
+        end_current = timedelta(seconds=0)
+        for step_name, step_info in self._jungle_path.items():
+            if self.clear_start:
+                end_current = step_info['end'] if step_info['end'] and step_info['end'] > end_current and step_info['total'] else end_current
+                clear_current = (self.time - self.clear_start)
+
+                start = format_time(step_info['start'], mode='sec') if step_info['start'] else '0:00:0'
+                end = format_time(step_info['end'], mode='sec') if step_info['end'] else (format_time(clear_current, mode='sec') if clear_current else '0:00:0')
+                total = format_time(step_info['total'], mode='sec') if step_info['end'] else format_time(clear_current - step_info['start'], mode='sec')
+
+                name, color = get_name_and_color(step_name)
+                jungle_chrono[step_name] = {'name': name, 'color': color, 'start': start, 'end': end, 'total': total}
+
+                n_camps = n_camps + 1 if not step_name.startswith('moving') and step_info['end'] else n_camps
+
+                n_step += 1
+
+        if jungle_chrono:
+            jungle_chrono['total'] = {'name': 'TOTAL', 'color': 'yellow',
+                                      'start': f'{n_camps}camp',
+                                      'end': f"{format_time(end_current, mode='sec')}--" if format_time(end_current, mode='sec') else '',
+                                      'total': format_time(end_current + timedelta(seconds=90), mode='sec') if format_time(end_current, mode='sec') else ''}
+
+        return jungle_chrono
