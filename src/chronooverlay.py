@@ -1,5 +1,6 @@
 import tkinter as tk
 # from PIL import Image, ImageTk
+from infi.systray import SysTrayIcon
 
 import win32gui
 # import win32con
@@ -14,6 +15,9 @@ from pymem.exception import ProcessError, MemoryReadError
 # https://stackoverflow.com/questions/29641616/drag-window-when-using-overrideredirect
 
 
+path_img = PurePath(PurePath(__file__).parent, 'img')
+
+
 class CustomFrame(tk.Frame):
 
     def __init__(self, *args, **kwargs):
@@ -25,7 +29,7 @@ class CustomFrame(tk.Frame):
         # frame = RBGAImage('bluepot.png')
         # frame = ImageTk.PhotoImage(frame)
 
-        image = tk.PhotoImage(file=PurePath(PurePath(__file__).parent, 'img', 'window.png'))
+        image = tk.PhotoImage(file=PurePath(path_img, 'window.png'))
 
         self.background_image = image.zoom(2).subsample(3)
         self.background = tk.Label(self, border=0, bg='grey15', image=self.background_image)
@@ -39,7 +43,7 @@ class ChronoOverlay(tk.Tk):
 
         self.game = game
 
-        self.overrideredirect(True)
+        self.overrideredirect(True)  # Deletes Windows' default title bar
 
         self.wm_attributes('-alpha', 0.75)
         self.wm_attributes('-transparentcolor', 'grey15')  # str_a_ange color to avoid jagged borders
@@ -55,10 +59,32 @@ class ChronoOverlay(tk.Tk):
         self.bind('<Button-1>', self.click)
         self.bind('<B1-Motion>', self.drag)
 
-        self.set_geometry()
+        if not hasattr(self.game, 'mockup'):
+            self.set_geometry()
+        else:
+            self.geometry("213x320")
+
         self.set_title_bar()
         self.set_headers()
         self.set_labels()
+
+    def show(self, event):
+        self.deiconify()
+
+    def hide(self, event):
+        self.withdraw()
+
+    def close(self, event):
+        self.quit()
+
+    def drag(self, event):
+        x = self.winfo_pointerx() - self._offsetx
+        y = self.winfo_pointery() - self._offsety
+        self.geometry('+{x}+{y}'.format(x=x, y=y))
+
+    def click(self, event):
+        self._offsetx = event.x
+        self._offsety = event.y
 
     def set_geometry(self):
         # WINDOW RECT
@@ -100,18 +126,6 @@ class ChronoOverlay(tk.Tk):
         self.geometry(f"213x320+{window_properties['margin_left'] + window_properties['width'] - 228}+146")
         # self.geometry('160x240')
 
-    def close(self, event):
-        self.quit()
-
-    def drag(self, event):
-        x = self.winfo_pointerx() - self._offsetx
-        y = self.winfo_pointery() - self._offsety
-        self.geometry('+{x}+{y}'.format(x=x, y=y))
-
-    def click(self, event):
-        self._offsetx = event.x
-        self._offsety = event.y
-
     def create_label(self, text, size, color):
         return tk.Label(self,
                         textvariable=text,
@@ -133,14 +147,19 @@ class ChronoOverlay(tk.Tk):
                             widget.config(fg='#1F1F1F')
                     except tk.TclError:
                         pass
-    
+
             self.game.reset_jungle()
 
-        self.logo_text = tk.StringVar()
-        self.logo_text.set('BLUEPOT')
+        # LOGO
+        image = tk.PhotoImage(file=PurePath(path_img, 'potion.png'))
+        image_logo = image.subsample(9)
 
-        self.logo_label = tk.Label(self, text='BLUEPOT', font=('Tahoma', 11, 'bold'), fg='#72A7E8', bg='#1F1F1F', bd=0, pady=0)
-        self.logo_label.place(x=13, y=12)
+        self.logo = tk.Label(self, border=0, bg='#1F1F1F', image=image_logo)
+        self.logo.image = image_logo  # * Otherwise this won't work
+        self.logo.place(x=11, y=13)
+
+        self.logo_label = tk.Label(self, text='Bluepot', font=('Tahoma', 10, 'bold'), fg='#72A7E8', bg='#1F1F1F', bd=0, pady=0)
+        self.logo_label.place(x=37, y=13)
 
         # BUTTONS
         self.button_reset = tk.Button(self, text='Reset', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=reset_jungle_chrono)
@@ -184,7 +203,7 @@ class ChronoOverlay(tk.Tk):
             'blue_red': {'name': 'Red', 'color': '#e87272', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
             'moving_5': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
             'wolves_red': {'name': 'Krugs', 'color': '#e87272', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'total': {'name': 'TOTAL', 'color': 'yellow', 'start': '', 'end': '', 'total': '0:00:0'},
+            'total': {'name': 'TOTAL', 'color': 'yellow', 'start': '6camp', 'end': '0:00:0--', 'total': '0:00:0'},
         }
 
         self.geometry("213x320")
@@ -334,12 +353,24 @@ class ChronoOverlay(tk.Tk):
         self.after(1, self.update_labels)
         self.mainloop()
 
+    def create(self):
+        '''Set system tray icon'''
+        menu_options = (('Show', None, self.show),
+                        ('Hide', None, self.hide),
+                        )
+
+        path = str(PurePath(path_img, 'potion.ico'))
+        systray = SysTrayIcon(path, 'Bluepot', menu_options, on_quit=self.close)
+        systray.start()
+
+        self.run()
+
 
 if __name__ == '__main__':
 
     class Game():
         def __init__(self):
-            pass
+            self.mockup = True
 
         def get_jungle_chrono(self):
             return
@@ -351,4 +382,4 @@ if __name__ == '__main__':
 
     overlay = ChronoOverlay(game)
     overlay.set_mockup()
-    overlay.run()
+    overlay.create()

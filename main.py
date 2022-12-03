@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
             # JUNGLE CHRONO OVERLAY
             chrono_overlay = ChronoOverlay(game)
-            chrono_overlay.run()
+            chrono_overlay.create()
             break
 
             # if n <= n_iterations or not n_iterations:
