@@ -30,7 +30,7 @@ message_current_len = 0x06BC  # Int32 || 0x06D0, 0x06F4
 # ·····································································
 
 # LOCAL PLAYER
-local_player = 0x3157F40  # [<League of Legends.exe> + 0x3157F40]
+local_player = 0x3143DA0  # [<League of Legends.exe> + 0x3143DA0]
 
 # LOCAL PLAYER ATTRIBUTES
 local_player_summoner_name_start = 0x0054  # Text8[len]
