@@ -162,7 +162,6 @@ class Entity:
         is_visible = self.pm.read_bool(self.address + Entity.is_visible_offset)
         return is_visible
 
-
     @property
     def mana(self):
         mana = self.pm.read_float(self.address + Entity.mana_offset)

@@ -55,7 +55,7 @@ class ChronoOverlay(tk.Tk):
         self._offsetx = 0
         self._offsety = 0
 
-        self.bind('<Escape>', self.close)
+        # self.bind('<Escape>', self.close)
         self.bind('<Button-1>', self.click)
         self.bind('<B1-Motion>', self.drag)
 
@@ -142,7 +142,7 @@ class ChronoOverlay(tk.Tk):
                 if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
                     try:
                         value = self.getvar(widget['textvariable'])
-                        if value not in ['BLUEPOT', '', 'Start', 'End', 'Clear']:
+                        if value not in ['', 'Start', 'End', 'Clear']:
                             # widget.place_forget()
                             widget.config(fg='#1F1F1F')
                     except tk.TclError:
@@ -158,7 +158,7 @@ class ChronoOverlay(tk.Tk):
         self.logo.image = image_logo  # * Otherwise this won't work
         self.logo.place(x=11, y=13)
 
-        self.logo_label = tk.Label(self, text='Bluepot', font=('Tahoma', 10, 'bold'), fg='#72A7E8', bg='#1F1F1F', bd=0, pady=0)
+        self.logo_label = tk.Label(self, text='BluePot', font=('Tahoma', 10, 'bold'), fg='#72A7E8', bg='#1F1F1F', bd=0, pady=0)
         self.logo_label.place(x=37, y=13)
 
         # BUTTONS
@@ -343,27 +343,17 @@ class ChronoOverlay(tk.Tk):
 
                     n += 1
 
-        except ProcessError or MemoryReadError:
-            '''Game finished!'''
-            self.quit()
+        # except ProcessError or MemoryReadError:
+        except Exception:
+            '''Game not available'''
+            print('\nGame not available - overlay destroyed')
+            self.destroy()
 
         self.after(1, self.update_labels)
 
     def run(self):
         self.after(1, self.update_labels)
         self.mainloop()
-
-    def create(self):
-        '''Set system tray icon'''
-        menu_options = (('Show', None, self.show),
-                        ('Hide', None, self.hide),
-                        )
-
-        path = str(PurePath(path_img, 'potion.ico'))
-        systray = SysTrayIcon(path, 'Bluepot', menu_options, on_quit=self.close)
-        systray.start()
-
-        self.run()
 
 
 if __name__ == '__main__':
@@ -382,4 +372,4 @@ if __name__ == '__main__':
 
     overlay = ChronoOverlay(game)
     overlay.set_mockup()
-    overlay.create()
+    overlay.run()
