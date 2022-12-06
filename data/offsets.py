@@ -88,7 +88,7 @@ minimap_hud_size_b = 0x0048  # Float || 0x0050
 # ·····································································
 
 # ENTITY ATTRIBUTES
-name_verbose = 0x0054  # Text8Ptr [Works only in multi camp monsters and towers]
+name_full = 0x0054  # Text8Ptr [Works only in multi camp monsters and towers]
 position = 0x01DC  # Vector3: x, z, y || 0x0224
 is_visible = 0x0274  # Bool
 is_dead_ofuscated_n = 0x0288  # Int8 [0, 2 = alive; 1, 3 = dead]

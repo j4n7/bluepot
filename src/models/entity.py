@@ -20,7 +20,7 @@ with open(data_dir / 'jungle_camps.json') as json_file:
 
 class Entity:
     name_offset = offsets.name
-    name_verbose_offset = offsets.name_verbose
+    name_full_offset = offsets.name_full
     position_offset = offsets.position
     is_visible_offset = offsets.is_visible
     mana_offset = offsets.mana
@@ -64,33 +64,33 @@ class Entity:
         return BuffManager(self.pm, self.address)
 
     @cached_property
-    def name_short(self):
-        name_short = None
+    def name_memory(self):
+        name_memory = None
         try:
             pointer = self.address + Entity.name_offset
-            name_short_address = self.pm.read_int(pointer)
+            name_memory_address = self.pm.read_int(pointer)
             try:
-                name_short = self.pm.read_string(name_short_address)
+                name_memory = self.pm.read_string(name_memory_address)
             except UnicodeDecodeError:
                 pass
         except MemoryReadError:
             '''Entity from object manager'''
-        return name_short
+        return name_memory
 
     @cached_property
-    def name_verbose(self):
-        name_verbose = None
+    def name_memory_full(self):
+        name_memory_full = None
         try:
-            pointer = self.address + Entity.name_verbose_offset
-            name_verbose_address = self.pm.read_int(pointer)
+            pointer = self.address + Entity.name_full_offset
+            name_memory_full_address = self.pm.read_int(pointer)
             try:
-                name_verbose = self.pm.read_string(name_verbose_address)
+                name_memory_full = self.pm.read_string(name_memory_full_address)
             except UnicodeDecodeError:
                 pass
         except MemoryReadError:
             pass
 
-        return name_verbose
+        return name_memory_full
 
     @cached_property
     def name(self):
@@ -100,7 +100,6 @@ class Entity:
                 if self.position == camp_info['spawn_pos']:
                     return name
         elif self.category == 'jungle_monster':
-
             def _in_respawn_distance(position, spawn_pos, threshold):
                 position = (position["x"], position["y"], position["z"])
                 spawn_pos = (spawn_pos["x"], spawn_pos["y"], spawn_pos["z"])
@@ -110,45 +109,45 @@ class Entity:
                 return False
 
             for name, monster_info in Entity.jungle_monsters.items():
-                if self.name_verbose:
-                    if self.name_verbose == monster_info['name_verbose']:
+                if self.name_memory_full:
+                    if self.name_memory_full == monster_info['name_memory_full']:
                         return name
                 else:
-                    if self.name_short == monster_info['name_short']:
-                        # * Take out mini krugs that appear when killing the ancient krug
-                        # * They don't have a verbose name
-                        if self.name_short == 'SRU_KrugMini':
-                            return 'krug_mini_child'
+                    if self.name_memory == monster_info['name_memory']:
                         if _in_respawn_distance(self.position, monster_info['spawn_pos'], 2000):
                             return name
+        elif self.category == 'champion':
+            return self.name_memory
 
     @cached_property
     def category(self):
         # TODO: all plants, wards and super-minions
-        if self.name_short in [monster_info['name_short'] for monster_info in Entity.jungle_monsters.values()]:
+        if self.name_memory in [monster_info['name_memory'] for monster_info in Entity.jungle_monsters.values()]:
             return 'jungle_monster'
-        if self.name_short == 'PreSeason_Turret_Shield':
+        elif self.name_memory == 'PreSeason_Turret_Shield':
             return 'tower_shield'
-        if self.name_short == 'SRU_PlantRespawnMarker':
+        elif self.name_memory == 'SRU_PlantRespawnMarker':
             return 'plant_respawn'
-        if self.name_short == 'SRU_Plant_Health':
+        elif self.name_memory == 'SRU_Plant_Health':
             return 'plant_health'
-        if self.name_short == 'SRU_OrderMinionMelee':
+        elif self.name_memory == 'SRU_OrderMinionMelee':
             return 'minion_melee_blue'
-        if self.name_short == 'SRU_OrderMinionRanged':
+        elif self.name_memory == 'SRU_OrderMinionRanged':
             return 'minion_ranged_blue'
-        if self.name_short == 'SRU_OrderMinionSiege':
+        elif self.name_memory == 'SRU_OrderMinionSiege':
             return 'minion_cannon_blue'
-        if self.name_short == 'SRU_ChaosMinionMelee':
+        elif self.name_memory == 'SRU_ChaosMinionMelee':
             return 'minion_melee_red'
-        if self.name_short == 'SRU_ChaosMinionRanged':
+        elif self.name_memory == 'SRU_ChaosMinionRanged':
             return 'minion_ranged_red'
-        if self.name_short == 'SRU_ChaosMinionSiege':
+        elif self.name_memory == 'SRU_ChaosMinionSiege':
             return 'minion_cannon_red'
-        if self.name_short == 'SRU_CampRespawnMarker':
+        elif self.name_memory == 'SRU_CampRespawnMarker':
             return 'jungle_camp_resapwn'
-        if self.name_short == 'SRU_BaronSpawn':
+        elif self.name_memory == 'SRU_BaronSpawn':
             return 'baron_resapwn'
+        else:
+            return 'champion'
 
     @property
     def position(self):

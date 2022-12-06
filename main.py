@@ -84,9 +84,9 @@ if __name__ == '__main__':
     bluepot.chrono_overlay()
     bluepot.start()
 
-    # game = bluepot.get_game()
-    # local_player = game.local_player
-    # champion_name = game.local_player.name_short
+    game = bluepot.get_game()
+    local_player = game.local_player
+    champion_name = game.local_player.name
 
     # while True:
     #     print(f'Local player position: {local_player.position}')

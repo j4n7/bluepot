@@ -1,7 +1,7 @@
 {
 	"gromp_blue": {
-		"name_short": "SRU_Gromp",
-		"name_verbose": "",
+		"name_memory": "SRU_Gromp",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 2110.6279296875,
 			"y": 8450.984375,
@@ -9,8 +9,8 @@
 		}
 	},
 	"blue_blue": {
-		"name_short": "SRU_Blue",
-		"name_verbose": "",
+		"name_memory": "SRU_Blue",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 3821.488525390625,
 			"y": 7901.05419921875,
@@ -18,8 +18,8 @@
 		}
 	},
 	"wolf_blue": {
-		"name_short": "SRU_Murkwolf",
-		"name_verbose": "SRU_Murkwolf2.1.1",
+		"name_memory": "SRU_Murkwolf",
+		"name_memory_full": "SRU_Murkwolf2.1.1",
 		"spawn_pos": {
 			"x": 3780.6279296875,
 			"y": 6443.98388671875,
@@ -27,8 +27,8 @@
 		}
 	},
 	"wolf_mini_blue_1": {
-		"name_short": "SRU_MurkwolfMini",
-		"name_verbose": "SRU_MurkwolfMini2.1.2",
+		"name_memory": "SRU_MurkwolfMini",
+		"name_memory_full": "SRU_MurkwolfMini2.1.2",
 		"spawn_pos": {
 			"x": 3980.6279296875,
 			"y": 6443.98388671875,
@@ -36,8 +36,8 @@
 		}
 	},
 	"wolf_mini_blue_2": {
-		"name_short": "SRU_MurkwolfMini",
-		"name_verbose": "SRU_MurkwolfMini2.1.3",
+		"name_memory": "SRU_MurkwolfMini",
+		"name_memory_full": "SRU_MurkwolfMini2.1.3",
 		"spawn_pos": {
 			"x": 3730.6279296875,
 			"y": 6593.98388671875,
@@ -45,8 +45,8 @@
 		}
 	},
 	"raptor_blue": {
-		"name_short": "SRU_Razorbeak",
-		"name_verbose": "SRU_Razorbeak3.1.1",
+		"name_memory": "SRU_Razorbeak",
+		"name_memory_full": "SRU_Razorbeak3.1.1",
 		"spawn_pos": {
 			"x": 6823.89501953125,
 			"y": 5507.755859375,
@@ -54,8 +54,8 @@
 		}
 	},
 	"raptor_mini_blue_1": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini3.1.2",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini3.1.2",
 		"spawn_pos": {
 			"x": 6923.89501953125,
 			"y": 5607.755859375,
@@ -63,8 +63,8 @@
 		}
 	},
 	"raptor_mini_blue_2": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini3.1.3",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini3.1.3",
 		"spawn_pos": {
 			"x": 7060.4580078125,
 			"y": 5499.27392578125,
@@ -72,8 +72,8 @@
 		}
 	},
 	"raptor_mini_blue_3": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini3.1.4",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini3.1.4",
 		"spawn_pos": {
 			"x": 6962.7177734375,
 			"y": 5354.35400390625,
@@ -81,8 +81,8 @@
 		}
 	},
 	"raptor_mini_blue_4": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini3.1.5",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini3.1.5",
 		"spawn_pos": {
 			"x": 6852.22900390625,
 			"y": 5227.083984375,
@@ -90,8 +90,8 @@
 		}
 	},
 	"raptor_mini_blue_5": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini3.1.6",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini3.1.6",
 		"spawn_pos": {
 			"x": 7106.22900390625,
 			"y": 5266.083984375,
@@ -99,8 +99,8 @@
 		}
 	},
 	"red_blue": {
-		"name_short": "SRU_Red",
-		"name_verbose": "",
+		"name_memory": "SRU_Red",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 7765.244140625,
 			"y": 4020.18701171875,
@@ -108,8 +108,8 @@
 		}
 	},
 	"krug_ancient_blue": {
-		"name_short": "SRU_Krug",
-		"name_verbose": "",
+		"name_memory": "SRU_Krug",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 8482.470703125,
 			"y": 2705.947998046875,
@@ -117,8 +117,8 @@
 		}
 	},
 	"krug_blue": {
-		"name_short": "SRU_KrugMini",
-		"name_verbose": "SRU_KrugMini5.1.2",
+		"name_memory": "SRU_KrugMini",
+		"name_memory_full": "SRU_KrugMini5.1.2",
 		"spawn_pos": {
 			"x": 8394.76953125,
 			"y": 2641.590087890625,
@@ -126,17 +126,18 @@
 		}
 	},
 	"krug_mini_blue": {
-		"name_short": "SRU_KrugMiniMini",
-		"name_verbose": "",
+		"name_memory": "SRU_KrugMiniMini",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 8275.470703125,
 			"y": 2688.947998046875,
 			"z": 51.130001068115234
-		}
+		},
+		"comment": "Spawning position is taken from camp respawn maker"
 	},
 	"gromp_red": {
-		"name_short": "SRU_Gromp",
-		"name_verbose": "",
+		"name_memory": "SRU_Gromp",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 12703.62890625,
 			"y": 6443.98388671875,
@@ -144,8 +145,8 @@
 		}
 	},
 	"blue_red": {
-		"name_short": "SRU_Blue",
-		"name_verbose": "",
+		"name_memory": "SRU_Blue",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 11031.728515625,
 			"y": 6990.84423828125,
@@ -153,8 +154,8 @@
 		}
 	},
 	"wolf_red": {
-		"name_short": "SRU_Murkwolf",
-		"name_verbose": "SRU_Murkwolf8.1.1",
+		"name_memory": "SRU_Murkwolf",
+		"name_memory_full": "SRU_Murkwolf8.1.1",
 		"spawn_pos": {
 			"x": 11008.15234375,
 			"y": 8387.408203125,
@@ -162,8 +163,8 @@
 		}
 	},
 	"wolf_mini_red_1": {
-		"name_short": "SRU_MurkwolfMini",
-		"name_verbose": "SRU_MurkwolfMini8.1.2",
+		"name_memory": "SRU_MurkwolfMini",
+		"name_memory_full": "SRU_MurkwolfMini8.1.2",
 		"spawn_pos": {
 			"x": 11058.15234375,
 			"y": 8217.408203125,
@@ -171,8 +172,8 @@
 		}
 	},
 	"wolf_mini_red_2": {
-		"name_short": "SRU_MurkwolfMini",
-		"name_verbose": "SRU_MurkwolfMini8.1.3",
+		"name_memory": "SRU_MurkwolfMini",
+		"name_memory_full": "SRU_MurkwolfMini8.1.3",
 		"spawn_pos": {
 			"x": 10808.15234375,
 			"y": 8387.408203125,
@@ -180,8 +181,8 @@
 		}
 	},
 	"raptor_red": {
-		"name_short": "SRU_Razorbeak",
-		"name_verbose": "SRU_Razorbeak9.1.1",
+		"name_memory": "SRU_Razorbeak",
+		"name_memory_full": "SRU_Razorbeak9.1.1",
 		"spawn_pos": {
 			"x": 7986.9970703125,
 			"y": 9471.388671875,
@@ -189,8 +190,8 @@
 		}
 	},
 	"raptor_mini_red_1": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini9.1.2",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini9.1.2",
 		"spawn_pos": {
 			"x": 7886.99658203125,
 			"y": 9312.3896484375,
@@ -198,8 +199,8 @@
 		}
 	},
 	"raptor_mini_red_2": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini9.1.3",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini9.1.3",
 		"spawn_pos": {
 			"x": 7756.9970703125,
 			"y": 9451.388671875,
@@ -207,8 +208,8 @@
 		}
 	},
 	"raptor_mini_red_3": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini9.1.4",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini9.1.4",
 		"spawn_pos": {
 			"x": 7854.38916015625,
 			"y": 9610.4736328125,
@@ -216,8 +217,8 @@
 		}
 	},
 	"raptor_mini_red_4": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini9.1.5",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini9.1.5",
 		"spawn_pos": {
 			"x": 7997.22900390625,
 			"y": 9772.083984375,
@@ -225,8 +226,8 @@
 		}
 	},
 	"raptor_mini_red_5": {
-		"name_short": "SRU_RazorbeakMini",
-		"name_verbose": "SRU_RazorbeakMini9.1.6",
+		"name_memory": "SRU_RazorbeakMini",
+		"name_memory_full": "SRU_RazorbeakMini9.1.6",
 		"spawn_pos": {
 			"x": 7724.22900390625,
 			"y": 9724.083984375,
@@ -234,8 +235,8 @@
 		}
 	},
 	"red_red": {
-		"name_short": "SRU_Red",
-		"name_verbose": "",
+		"name_memory": "SRU_Red",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 7101.869140625,
 			"y": 10900.546875,
@@ -243,8 +244,8 @@
 		}
 	},
 	"krug_ancient_red": {
-		"name_short": "SRU_Krug",
-		"name_verbose": "",
+		"name_memory": "SRU_Krug",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 6317.09228515625,
 			"y": 12146.4580078125,
@@ -252,8 +253,8 @@
 		}
 	},
 	"krug_red": {
-		"name_short": "SRU_KrugMini",
-		"name_verbose": "SRU_KrugMini11.1.2",
+		"name_memory": "SRU_KrugMini",
+		"name_memory_full": "SRU_KrugMini11.1.2",
 		"spawn_pos": {
 			"x": 6547.09228515625,
 			"y": 12156.4580078125,
@@ -261,17 +262,18 @@
 		}
 	},
 	"krug_mini_red": {
-		"name_short": "SRU_KrugMiniMini",
-		"name_verbose": "",
+		"name_memory": "SRU_KrugMiniMini",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 6499.490234375,
 			"y": 12287.3798828125,
 			"z": 56.47679901123047
-		}
+		},
+		"comment": "Spawning position is taken from camp respawn maker"
 	},
 	"scuttle_top": {
-		"name_short": "Sru_Crab",
-		"name_verbose": "",
+		"name_memory": "Sru_Crab",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 4400.0,
 			"y": 9600.0,
@@ -279,8 +281,8 @@
 		}
 	},
 	"scuttle_bottom": {
-		"name_short": "Sru_Crab",
-		"name_verbose": "",
+		"name_memory": "Sru_Crab",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 10500.0,
 			"y": 5170.0,
@@ -288,8 +290,8 @@
 		}
 	},
 	"drake_air": {
-		"name_short": "SRU_Dragon_Air",
-		"name_verbose": "SRU_Dragon_Air",
+		"name_memory": "SRU_Dragon_Air",
+		"name_memory_full": "SRU_Dragon_Air",
 		"spawn_pos": {
 			"x": 9923.8955078125,
 			"y": 4407.755859375,
@@ -297,8 +299,8 @@
 		}
 	},
 	"drake_earth": {
-		"name_short": "SRU_Dragon_Earth",
-		"name_verbose": "SRU_Dragon_Earth",
+		"name_memory": "SRU_Dragon_Earth",
+		"name_memory_full": "SRU_Dragon_Earth",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -306,8 +308,8 @@
 		}
 	},
 	"drake_fire": {
-		"name_short": "SRU_Dragon_Fire",
-		"name_verbose": "SRU_Dragon_Fire",
+		"name_memory": "SRU_Dragon_Fire",
+		"name_memory_full": "SRU_Dragon_Fire",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -315,8 +317,8 @@
 		}
 	},
 	"drake_water": {
-		"name_short": "SRU_Dragon_Water",
-		"name_verbose": "SRU_Dragon_Water",
+		"name_memory": "SRU_Dragon_Water",
+		"name_memory_full": "SRU_Dragon_Water",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -324,8 +326,8 @@
 		}
 	},
 	"drake_hextech": {
-		"name_short": "SRU_Dragon_Hextech",
-		"name_verbose": "SRU_Dragon_Hextech",
+		"name_memory": "SRU_Dragon_Hextech",
+		"name_memory_full": "SRU_Dragon_Hextech",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -333,8 +335,8 @@
 		}
 	},
 	"drake_elder": {
-		"name_short": "SRU_Dragon_Elder",
-		"name_verbose": "SRU_Dragon_Elder",
+		"name_memory": "SRU_Dragon_Elder",
+		"name_memory_full": "SRU_Dragon_Elder",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -342,8 +344,8 @@
 		}
 	},
 	"herald": {
-		"name_short": "SRU_RiftHerald",
-		"name_verbose": "SRU_RiftHerald17.1.1",
+		"name_memory": "SRU_RiftHerald",
+		"name_memory_full": "SRU_RiftHerald17.1.1",
 		"spawn_pos": {
 			"x": 4930.1240234375,
 			"y": 10371.4462890625,
@@ -351,8 +353,8 @@
 		}
 	},
 	"herald_relic": {
-		"name_short": "SRU_RiftHerald_Relic",
-		"name_verbose": "Rift Herald Relic",
+		"name_memory": "SRU_RiftHerald_Relic",
+		"name_memory_full": "Rift Herald Relic",
 		"spawn_pos": {
 			"x": 4650.0,
 			"y": 10000.0,
@@ -360,8 +362,8 @@
 		}
 	},
 	"baron": {
-		"name_short": "SRU_Baron",
-		"name_verbose": "",
+		"name_memory": "SRU_Baron",
+		"name_memory_full": "",
 		"spawn_pos": {
 			"x": 5007.12353515625,
 			"y": 10471.4462890625,

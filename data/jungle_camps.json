@@ -1,6 +1,6 @@
 {
 	"gromp_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 2288.0185546875,
 			"y": 8448.1337890625,
@@ -12,7 +12,7 @@
 		"monsters": ["gromp_blue"]
 	},
 	"blue_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 3821.488525390625,
 			"y": 8101.05419921875,
@@ -24,7 +24,7 @@
 		"monsters": ["blue_blue"]
 	},
 	"wolves_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 3783.3798828125,
 			"y": 6495.56005859375,
@@ -36,7 +36,7 @@
 		"monsters": ["wolf_blue", "wolf_mini_blue_1", "wolf_mini_blue_2"]
 	},
 	"raptors_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 7061.5,
 			"y": 5325.509765625,
@@ -48,7 +48,7 @@
 		"monsters": ["raptor_blue", "raptor_mini_blue_1", "raptor_mini_blue_2", "raptor_mini_blue_3", "raptor_mini_blue_4", "raptor_mini_blue_5"]
 	},
 	"red_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 7762.24365234375,
 			"y": 4011.186767578125,
@@ -60,7 +60,7 @@
 		"monsters": ["red_blue"]
 	},
 	"krugs_blue": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 8394.76953125,
 			"y": 2641.590087890625,
@@ -72,7 +72,7 @@
 		"monsters": ["krug_ancient_blue", "krug_blue"]
 	},
 	"gromp_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 12703.62890625,
 			"y": 6443.98388671875,
@@ -84,7 +84,7 @@
 		"monsters": ["gromp_red"]
 	},
 	"blue_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 11131.728515625,
 			"y": 6990.84423828125,
@@ -96,7 +96,7 @@
 		"monsters": ["blue_red"]
 	},
 	"wolves_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 11059.76953125,
 			"y": 8419.830078125,
@@ -108,7 +108,7 @@
 		"monsters": ["wolf_red", "wolf_mini_red_1", "wolf_mini_red_2"]
 	},
 	"raptors_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 7820.22021484375,
 			"y": 9644.4501953125,
@@ -120,7 +120,7 @@
 		"monsters": ["raptor_red", "raptor_mini_red_1", "raptor_mini_red_2", "raptor_mini_red_3", "raptor_mini_red_4", "raptor_mini_red_5"]
 	},
 	"red_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 7066.869140625,
 			"y": 10975.546875,
@@ -132,7 +132,7 @@
 		"monsters": ["red_red"]
 	},
 	"krugs_red": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 6499.490234375,
 			"y": 12287.3798828125,
@@ -144,7 +144,7 @@
 		"monsters": ["krug_ancient_red", "krug_red"]
 	},
 	"scuttle_top": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 4400.0,
 			"y": 9600.0,
@@ -156,7 +156,7 @@
 		"monsters": ["scuttle_top"]
 	},
 	"scuttle_bottom": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 10500.0,
 			"y": 5170.0,
@@ -168,7 +168,7 @@
 		"monsters": ["scuttle_bottom"]
 	},
 	"drake": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 9866.1484375,
 			"y": 4414.01416015625,
@@ -180,7 +180,7 @@
 		"monsters": ["drake_air", "drake_earth", "drake_fire", "drake_water", "drake_hextech", "drake_elder"]
 	},
 	"herald": {
-        "name_short": "SRU_CampRespawnMarker",
+        "name_memory": "SRU_CampRespawnMarker",
 		"spawn_pos": {
 			"x": 5007.12353515625,
 			"y": 10471.4462890625,
@@ -192,7 +192,7 @@
 		"monsters": ["herald"]
 	},
 	"baron": {
-        "name_short": "SRU_BaronSpawn",
+        "name_memory": "SRU_BaronSpawn",
 		"spawn_pos": {
 			"x": 5007.12353515625,
 			"y": 10471.4462890625,
