@@ -77,8 +77,16 @@ def format_time(delta, mode='min'):
         min, sec = divmod(delta.seconds, 60)
         if mode == 'min':
             return '%02d:%02d' % (min, sec)
-        elif mode == 'sec':
-            return f'{min}:{str(sec).zfill(2)}.{str(int(round(delta.microseconds / 10 ** 6, 1) * 10))[:1]}'
+
+        elif mode.startswith('sec'):
+            micro_to_sec = delta.microseconds / 10 ** 6
+            if mode == 'sec1':
+                micro_to_sec_d1 = round(micro_to_sec, 1)
+                micro_parsed = str(int(micro_to_sec_d1 * 10))[0]
+            elif mode == 'sec2':
+                micro_to_sec_d2 = round(micro_to_sec, 2)
+                micro_parsed = str(int(micro_to_sec_d2 * 100))[:2].zfill(2)
+            return f'{min}:{str(sec).zfill(2)}.{micro_parsed}'
     return None
 
 

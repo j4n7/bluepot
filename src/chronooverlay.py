@@ -1,6 +1,8 @@
 import tkinter as tk
+from tkinter.filedialog import asksaveasfile
 # from PIL import Image, ImageTk
-from infi.systray import SysTrayIcon
+
+import datetime
 
 import win32gui
 # import win32con
@@ -8,6 +10,8 @@ import win32gui
 
 from pathlib import PurePath
 from pymem.exception import ProcessError, MemoryReadError
+
+from src.functions import format_time
 
 
 # https://stackoverflow.com/questions/63047053/how-to-replace-a-background-image-in-tkinter
@@ -52,6 +56,8 @@ class ChronoOverlay(tk.Tk):
         frame = CustomFrame(self)
         frame.pack(side='top', fill='both', expand='True')
 
+        self._padx = -6
+
         self._offsetx = 0
         self._offsety = 0
 
@@ -59,10 +65,7 @@ class ChronoOverlay(tk.Tk):
         self.bind('<Button-1>', self.click)
         self.bind('<B1-Motion>', self.drag)
 
-        if not hasattr(self.game, 'mockup'):
-            self.set_geometry()
-        else:
-            self.geometry("213x320")
+        self.set_geometry()
 
         self.set_title_bar()
         self.set_headers()
@@ -137,6 +140,65 @@ class ChronoOverlay(tk.Tk):
                         pady=0)
 
     def set_title_bar(self):
+        def export_jungle_chrono():
+            def format_jungle_lines(jungle_chrono):
+                camps_n = None
+                jungle_lines = []
+                for step_name, step_info in jungle_chrono.items():
+
+                    name = step_info['name']
+                    if step_name.startswith('moving'):
+                        name, number = step_name.split('_')
+                        name = f'M{number}'
+
+                    start = step_info['start']
+                    if step_name == 'total':
+                        camps_n = step_info['start'][0]
+                        start = ''
+
+                    color = step_info['color'].capitalize() if step_info['color'] else ''
+                    total = step_info['total'] if step_name != 'total' else f"{step_info['total']}*"
+
+                    line = f"{name.ljust(7)}   {color.ljust(7)}   {start.ljust(7)}   {step_info['end'][:7]}   {total}\n"
+                    jungle_lines.append(line)
+                    jungle_lines.append('---------------------------------------------------------\n')
+
+                return camps_n, jungle_lines
+
+            jungle_chrono = self.format_jungle_chrono(self.game.get_jungle_chrono(), format_color=False)
+            camps_n, jungle_lines = format_jungle_lines(jungle_chrono)
+
+            file_time = datetime.datetime.now().strftime("%d-%m-%Y__%H-%M-%S")
+            file_name = f'BluePot__{self.game.local_player.name_short}__{self.game.patch_version}__{file_time}.txt'
+            file_types = [("All Files", "*.*"), ("Text Documents", "*.txt")]
+            file_open = asksaveasfile(initialfile=file_name,
+                                      defaultextension=".txt",
+                                      filetypes=file_types)
+
+            file_lines = ['-----------------------------\n',
+                          'Created by BluePot\n',
+                          'Player name: <fill>\n',
+                          '-----------------------------\n',
+                          f'LOL version: {self.game.patch_version}\n',
+                          f'Champion name: {self.game.local_player.name_short}\n',
+                          '-----------------------------\n',
+                          'Starting side: <fill>\n',
+                          f'Number of camps: {camps_n}\n',
+                          '-----------------------------\n'
+                          '\n\n',
+                          '---------------------------------------------------------\n',
+                          'CAMPS     COLOR     START     END       TOTAL     SMITE  \n',
+                          '---------------------------------------------------------\n'
+                          ]
+
+            file_lines += jungle_lines + ['\n* Starting at 1:30\n']
+
+            try:
+                with file_open as file:
+                    file.writelines(file_lines)
+            except AttributeError:
+                '''Save canceled'''
+
         def reset_jungle_chrono():
             for widget in self.winfo_children():
                 if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
@@ -162,11 +224,11 @@ class ChronoOverlay(tk.Tk):
         self.logo_label.place(x=37, y=13)
 
         # BUTTONS
+        self.button_export = tk.Button(self, text='Export', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=export_jungle_chrono)
+        self.button_export.place(x=106, y=10)
+
         self.button_reset = tk.Button(self, text='Reset', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=reset_jungle_chrono)
         self.button_reset.place(x=156, y=10)
-
-        self.button_export = tk.Button(self, text='Export', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0)
-        self.button_export.place(x=106, y=10)
 
     def set_headers(self):
         # START
@@ -174,86 +236,38 @@ class ChronoOverlay(tk.Tk):
         self.header_total_text.set('Start')
 
         self.header_total_label = self.create_label(self.header_total_text, 10, 'yellow')
-        self.header_total_label.place(x=66, y=19 + 21)
+        self.header_total_label.place(x=self._padx + 66, y=19 + 21)
 
         # END
         self.header_end_text = tk.StringVar()
         self.header_end_text.set('End')
 
         self.header_end_label = self.create_label(self.header_end_text, 10, 'yellow')
-        self.header_end_label.place(x=114, y=19 + 21)
+        self.header_end_label.place(x=self._padx + 114, y=19 + 21)
 
         # TOTAL
         self.header_total_text = tk.StringVar()
         self.header_total_text.set('Clear')
 
         self.header_total_label = self.create_label(self.header_total_text, 10, 'yellow')
-        self.header_total_label.place(x=162, y=19 + 21)
+        self.header_total_label.place(x=self._padx + 162, y=19 + 21)
 
-    def set_mockup(self):
-        jungle_chrono = {
-            'gromp_blue': {'name': 'Gromp', 'color': '#72a7e8', 'start': '4:23.5', 'end': '5:23.5', 'total': '7:23.5'},
-            'moving_1': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'blue_blue': {'name': 'Blue', 'color': '#72a7e8', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'moving_2': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'wolves_blue': {'name': 'Wolves', 'color': '#72a7e8', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'moving_3': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'gromp_red': {'name': 'Raptors', 'color': '#e87272', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'moving_4': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'blue_red': {'name': 'Red', 'color': '#e87272', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'moving_5': {'name': '..........', 'color': 'white', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'wolves_red': {'name': 'Krugs', 'color': '#e87272', 'start': '0:00:0', 'end': '0:00:0', 'total': '0:00:0'},
-            'total': {'name': 'TOTAL', 'color': 'yellow', 'start': '6camp', 'end': '0:00:0--', 'total': '0:00:0'},
-        }
-
-        self.geometry("213x320")
-
-        # LABELS
-        n_row = 2
-        spacing = 21
-
+    def format_jungle_chrono(self, jungle_chrono, format_color=True):
         for step_name, step_info in jungle_chrono.items():
-            # NAME
-            setattr(self, f'{n_row}_name_text', tk.StringVar())
-            text = getattr(self, f'{n_row}_name_text')
-            text.set(step_info['name'])
+            if format_color:
+                step_info['color'] = '#72A7E8' if step_info['color'] == 'blue' else '#E87272' if step_info['color'] == 'red' else 'yellow' if step_name == 'total' else 'white'
+            step_info['start'] = format_time(step_info['start'], mode='sec2') if type(step_info['start']) is not str else step_info['start']
+            step_info['end'] = format_time(step_info['end'], mode='sec2') if step_info['end'] else ''
+            step_info['total'] = format_time(step_info['total'], mode='sec2') if step_info['total'] else ''
 
-            setattr(self, f'{n_row}_name_label', self.create_label(text, 10, step_info['color']))
-            label = getattr(self, f'{n_row}_name_label')
+            if not step_info['start']:
+                # For first camp
+                step_info['start'] = '0:00.00'
 
-            label.place(x=13, y=18 + n_row * spacing)
+            if step_name == 'total' and step_info['end']:
+                step_info['end'] += '-'
 
-            # START
-            setattr(self, f'{n_row}_start_text', tk.StringVar())
-            text = getattr(self, f'{n_row}_start_text')
-            text.set(step_info['start'])
-
-            setattr(self, f'{n_row}_start_label', self.create_label(text, 10, 'white'))
-            label = getattr(self, f'{n_row}_start_label')
-
-            label.place(x=66, y=19 + n_row * spacing)
-
-            # END
-            setattr(self, f'{n_row}_end_text', tk.StringVar())
-            text = getattr(self, f'{n_row}_end_text')
-            text.set(step_info['end'])
-
-            setattr(self, f'{n_row}_end_label', self.create_label(text, 10, 'green'))
-            label = getattr(self, f'{n_row}_end_label')
-
-            label.place(x=114, y=19 + n_row * spacing)
-
-            # CLEAR
-            setattr(self, f'{n_row}_clear_text', tk.StringVar())
-            text = getattr(self, f'{n_row}_clear_text')
-            text.set(step_info['total'])
-
-            setattr(self, f'{n_row}_clear_label', self.create_label(text, 10, 'yellow'))
-            label = getattr(self, f'{n_row}_clear_label')
-
-            label.place(x=162, y=19 + n_row * spacing)
-
-            n_row += 1
+        return jungle_chrono
 
     def set_labels(self):
         spacing = 21
@@ -272,7 +286,7 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n}_start_label', self.create_label(text, 10, 'white'))
             label = getattr(self, f'{n}_start_label')
-            label.place(x=66, y=19 + n * spacing)
+            label.place(x=self._padx + 66, y=19 + n * spacing)
 
             # END
             setattr(self, f'{n}_end_text', tk.StringVar())
@@ -280,7 +294,7 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n}_end_label', self.create_label(text, 10, 'green'))
             label = getattr(self, f'{n}_end_label')
-            label.place(x=114, y=19 + n * spacing)
+            label.place(x=self._padx + 114, y=19 + n * spacing)
 
             # CLEAR
             setattr(self, f'{n}_clear_text', tk.StringVar())
@@ -288,11 +302,14 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n}_clear_label', self.create_label(text, 10, 'yellow'))
             label = getattr(self, f'{n}_clear_label')
-            label.place(x=162, y=19 + n * spacing)
+            label.place(x=self._padx + 162, y=19 + n * spacing)
 
     def update_labels(self):
         try:
             if self.game.get_jungle_chrono():
+                # FORMAT TIME
+                jungle_chrono = self.format_jungle_chrono(self.game.get_jungle_chrono())
+
                 # FIRST ERASE CURRENT TEXT
                 for n in range(2, 14):
                     # NAME
@@ -312,7 +329,7 @@ class ChronoOverlay(tk.Tk):
                     text.set('')
 
                 n = 2
-                for step_name, step_info in self.game.get_jungle_chrono().items():
+                for step_name, step_info in jungle_chrono.items():
                     # NAME
                     label = getattr(self, f'{n}_name_label')
                     label.config(fg=step_info['color'])
@@ -354,22 +371,3 @@ class ChronoOverlay(tk.Tk):
     def run(self):
         self.after(1, self.update_labels)
         self.mainloop()
-
-
-if __name__ == '__main__':
-
-    class Game():
-        def __init__(self):
-            self.mockup = True
-
-        def get_jungle_chrono(self):
-            return
-
-        def reset_jungle(self):
-            return
-
-    game = Game()
-
-    overlay = ChronoOverlay(game)
-    overlay.set_mockup()
-    overlay.run()

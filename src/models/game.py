@@ -9,7 +9,7 @@ from .entity import Entity
 from .entitymanager import EntityManager
 from .objectmanager import ObjectManager
 
-from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time, format_time
+from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
@@ -31,6 +31,8 @@ class Game:
     def __init__(self, pm):
         self.pm = pm
         self.chat = Chat(pm)
+
+        self.patch_version = offsets.patch_version
 
         self.local_player = Entity(pm, pm.read_int(pm.base_address + Game.local_player_offset))
 
@@ -416,11 +418,11 @@ class Game:
             name, color = step_name.split('_')
             if name == 'moving':
                 name = '..........'
-                color = 'white'
-            if color == 'blue':
-                color = '#72A7E8'
-            elif color == 'red':
-                color = '#E87272'
+                color = None
+            # if color == 'blue':
+            #     color = '#72A7E8'
+            # elif color == 'red':
+            #     color = '#E87272'
             return name.capitalize(), color
 
         jungle_chrono = {}
@@ -432,9 +434,9 @@ class Game:
                 end_current = step_info['end'] if step_info['end'] and step_info['end'] > end_current and step_info['total'] else end_current
                 clear_current = (self.time - self.clear_start)
 
-                start = format_time(step_info['start'], mode='sec') if step_info['start'] else '0:00:0'
-                end = format_time(step_info['end'], mode='sec') if step_info['end'] else (format_time(clear_current, mode='sec') if clear_current else '0:00:0')
-                total = format_time(step_info['total'], mode='sec') if step_info['end'] else format_time(clear_current - step_info['start'], mode='sec')
+                start = step_info['start'] if step_info['start'] else timedelta(seconds=0)
+                end = step_info['end'] if step_info['end'] else (clear_current if clear_current else timedelta(seconds=0))
+                total = step_info['total'] if step_info['end'] else clear_current - step_info['start']
 
                 name, color = get_name_and_color(step_name)
                 jungle_chrono[step_name] = {'name': name, 'color': color, 'start': start, 'end': end, 'total': total}
@@ -444,9 +446,10 @@ class Game:
                 n_step += 1
 
         if jungle_chrono:
-            jungle_chrono['total'] = {'name': 'TOTAL', 'color': 'yellow',
-                                      'start': f'{n_camps}camp',
-                                      'end': f"{format_time(end_current, mode='sec')}--" if format_time(end_current, mode='sec') else '',
-                                      'total': format_time(end_current + timedelta(seconds=90), mode='sec') if format_time(end_current, mode='sec') else ''}
+            jungle_chrono['total'] = {'name': 'TOTAL',
+                                      'color': None,
+                                      'start': f'{n_camps}camps',
+                                      'end': end_current if end_current else '',
+                                      'total': end_current + timedelta(seconds=90) if end_current else ''}
 
         return jungle_chrono
