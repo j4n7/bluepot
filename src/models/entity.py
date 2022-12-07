@@ -94,7 +94,6 @@ class Entity:
 
     @cached_property
     def name(self):
-
         if self.category == 'jungle_camp_resapwn':
             for name, camp_info in Entity.jungle_camps.items():
                 if self.position == camp_info['spawn_pos']:

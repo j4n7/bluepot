@@ -232,11 +232,11 @@ class ChronoOverlay(tk.Tk):
 
     def set_headers(self):
         # START
-        self.header_total_text = tk.StringVar()
-        self.header_total_text.set('Start')
+        self.header_start_text = tk.StringVar()
+        self.header_start_text.set('Start')
 
-        self.header_total_label = self.create_label(self.header_total_text, 10, 'yellow')
-        self.header_total_label.place(x=self._padx + 66, y=19 + 21)
+        self.header_start_label = self.create_label(self.header_start_text, 10, 'yellow')
+        self.header_start_label.place(x=self._padx + 66, y=19 + 21)
 
         # END
         self.header_end_text = tk.StringVar()
@@ -361,10 +361,14 @@ class ChronoOverlay(tk.Tk):
                     n += 1
 
         # except ProcessError or MemoryReadError:
-        except Exception:
-            '''Game not available'''
-            print('\nGame not available - overlay destroyed')
-            self.destroy()
+        except Exception as exception:
+            exception_name = type(exception).__name__
+            if exception_name == 'AttributeError':
+                '''Clearing more than 6 camps'''
+            else:
+                '''Game not available'''
+                print('\nGame not available - overlay destroyed')
+                self.destroy()
 
         self.after(1, self.update_labels)
 

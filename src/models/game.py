@@ -90,6 +90,8 @@ class Game:
         with open(data_dir / 'jungle_monsters.json') as json_file:
             self.jungle_monsters_stored = json.load(json_file)
 
+        self._krugs_mini = {'blue': {'alive': [], 'dead': []}, 'red': {'alive': [], 'dead': []}}
+
         for monster_name, monster_info in self.jungle_monsters_stored.items():
             monster_info['is_dead'] = True
             monster_info['attack_time'] = None
@@ -136,18 +138,42 @@ class Game:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
-                    # MONSTER DEAD
-                    if jungle_monster.is_dead and not jungle_monster_stored['is_dead']:
-                        jungle_monster_stored['is_dead'] = True
-                        jungle_monster_stored['death_time'] = self.time
-                        jungle_monster_stored['death_visible'] = jungle_monster.is_visible
+        
+                    if jungle_monster.is_dead:
+                        # MONSTER DEAD
+
+                        # UPDATE MINI KRUGS
+                        if jungle_monster.name in ['krug_mini_blue', 'krug_mini_red']:
+                            color = jungle_monster.name.split('_')[2]
+                            if jungle_monster.address in self._krugs_mini[color]['alive']:
+                                self._krugs_mini[color]['alive'].remove(jungle_monster.address)
+                                self._krugs_mini[color]['dead'].append(jungle_monster.address)
+
+                        if not jungle_monster_stored['is_dead']:
+                            jungle_monster_stored['is_dead'] = True
+                            jungle_monster_stored['death_time'] = self.time
+                            jungle_monster_stored['death_visible'] = jungle_monster.is_visible
+
                     elif not jungle_monster.is_dead:
                         # MONSTER SPAWNED
+
+                        # UPDATE MINI KRUGS
+                        if jungle_monster.name in ['krug_mini_blue', 'krug_mini_red']:
+                            color = jungle_monster.name.split('_')[2]
+                            if jungle_monster.address not in self._krugs_mini[color]['alive']:
+                                self._krugs_mini[color]['alive'].append(jungle_monster.address)
+
                         if jungle_monster_stored['is_dead']:
                             jungle_monster_stored['is_dead'] = False
                             jungle_monster_stored['attack_time'] = None
                             jungle_monster_stored['death_time'] = None
                             jungle_monster_stored['death_visible'] = None
+
+                            # RESET MINI KRUGS
+                            if jungle_monster.name in ['ancient_krug_blue', 'ancient_krug_red']:
+                                color = jungle_monster.name.split('_')[2]
+                                self._krugs_mini[color] = {'alive': [], 'dead': []}
+
                         # MONSTER ATTACKED
                         elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked:
                             jungle_monster_stored['attack_time'] = self.time
@@ -246,6 +272,13 @@ class Game:
                 # ! camp_is_dead can be inaccurate for monsters killed out of vision (approx. 4 seconds)
                 camp_is_dead = all([self.jungle_monsters_stored[monster]['is_dead'] for monster in camp_stored_info['monsters']])
                 camp_is_death_visible = get_camp_is_death_visible(camp_is_dead, self.jungle_monsters_stored, camp_stored_info['monsters'])
+
+                if camp_name in ['krugs_blue', 'krugs_red']:
+                    color = camp_name.split('_')[1]
+                    if len(self._krugs_mini[color]['dead']) < 6:
+                        camp_is_dead = False
+                        camp_is_death_visible = False
+
                 # CAMP DEAD
                 # * Only update jungle camps where player has vision of the camp being cleared
                 if (
@@ -386,15 +419,17 @@ class Game:
         '''The order of execution of these methods is non trivial.'''
         self._update_jungle_monsters()
         self._update_jungle_epic_camps()
-        self._update_jungle_camps()
-        self._update_jungle_camp_respawns()
-        self._update_jungle_timers()
+        self._update_jungle_camps()  # ! S13: needs an update to correctly determine if player has vision
+        # self._update_jungle_camp_respawns()  # ! S13: interferes with Krug camp timing (mini Krugs)
+        # self._update_jungle_timers()  #  ! S13: not working till other methods are fixed
 
     def get_jungle_camps(self):
         self.update_jungle()
         return self.jungle_camps_stored
 
     def reset_jungle(self):
+        self._krugs_mini = {'blue': {'alive': [], 'dead': []}, 'red': {'alive': [], 'dead': []}}
+
         for monster_name, monster_info in self.jungle_monsters_stored.items():
             monster_info['is_dead'] = True
             monster_info['attack_time'] = None
@@ -430,7 +465,8 @@ class Game:
         n_camps = 0
         end_current = timedelta(seconds=0)
         for step_name, step_info in self._jungle_path.items():
-            if self.clear_start:
+            if self.clear_start and n_step <= 10 and n_camps <= 5:  # * Max overlay space
+
                 end_current = step_info['end'] if step_info['end'] and step_info['end'] > end_current and step_info['total'] else end_current
                 clear_current = (self.time - self.clear_start)
 
@@ -442,7 +478,7 @@ class Game:
                 jungle_chrono[step_name] = {'name': name, 'color': color, 'start': start, 'end': end, 'total': total}
 
                 n_camps = n_camps + 1 if not step_name.startswith('moving') and step_info['end'] else n_camps
-
+                
                 n_step += 1
 
         if jungle_chrono:
