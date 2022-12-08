@@ -4,11 +4,12 @@ from pymem.exception import MemoryReadError
 from functools import cached_property
 from pathlib import Path
 
+from src.functions import get_base_dir
 from src.models.buffmanager import BuffManager
 import data.offsets as offsets
 
 
-base_dir = Path(__file__).parent.parent.parent
+base_dir = get_base_dir()
 data_dir = base_dir / 'data'
 
 with open(data_dir / 'jungle_monsters.json') as json_file:

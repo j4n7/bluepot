@@ -3,6 +3,8 @@ import os
 from infi.systray import SysTrayIcon
 from pathlib import PurePath
 
+from src.functions import get_base_dir
+
 
 class TrayIcon():
     '''System tray icon'''
@@ -14,7 +16,8 @@ class TrayIcon():
 
         menu_options = ()
 
-        path_img = PurePath(PurePath(__file__).parent, 'img')
+        base_dir = get_base_dir()
+        path_img = PurePath(base_dir, 'src', 'img')
         path_icon = str(PurePath(path_img, 'potion.ico'))
 
         systray = SysTrayIcon(path_icon, 'BluePot', menu_options, on_quit=lambda _: os._exit(0))

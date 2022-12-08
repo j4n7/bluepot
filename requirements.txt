@@ -1,0 +1,6 @@
+pywin32
+requests
+beautifulsoup4
+infi.systray
+pymem
+pyinstaller

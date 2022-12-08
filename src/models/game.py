@@ -9,7 +9,7 @@ from .entity import Entity
 from .entitymanager import EntityManager
 from .objectmanager import ObjectManager
 
-from src.functions import get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
+from src.functions import get_base_dir, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
@@ -84,7 +84,7 @@ class Game:
         Read current monsters in memory: useful when reconnecting to a game that has already started.
         Otherwise a monster can be alive and not be accounted when dying.
         '''
-        base_dir = Path(__file__).parent.parent.parent
+        base_dir = get_base_dir()
         data_dir = base_dir / 'data'
 
         with open(data_dir / 'jungle_monsters.json') as json_file:
@@ -115,7 +115,7 @@ class Game:
         Initialize the state of jungle camps.
         In this case there is no need to read memory as next jungle update will get their real state.
         '''
-        base_dir = Path(__file__).parent.parent.parent
+        base_dir = get_base_dir()
         data_dir = base_dir / 'data'
 
         with open(data_dir / 'jungle_camps.json') as json_file:

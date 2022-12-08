@@ -1,6 +1,9 @@
-import requests
+import sys
 import json
+import requests
 import urllib3
+
+from pathlib import Path
 from datetime import datetime, timedelta
 
 from data.lol_live_urls import lol_live_game_stats_url, lol_live_game_events_url, lol_live_players_url
@@ -9,6 +12,15 @@ from data.lol_live_urls import lol_live_game_stats_url, lol_live_game_events_url
 # Disable insecure https warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
+def get_base_dir():
+    '''Get absolute path to base directory, works for dev and for PyInstaller'''
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        base_dir = Path(sys._MEIPASS)
+    else:
+        base_dir = Path(__file__).parent.parent
+    return base_dir
+    
 
 def get_game_stats():
     game_stats_request = requests.get(lol_live_game_stats_url, verify=False)
