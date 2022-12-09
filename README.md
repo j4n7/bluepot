@@ -35,6 +35,8 @@ Currently BluePot is released as a **Windows Exectuable** that implements an ove
 
 BluePot Windows Exectuable provides an **overlay that features a jungle path chronometer**.
 
+You may check it out in this **[YouTube video](https://www.youtube.com/watch?v=7N-pLBgOYVw)**.
+
 You can get the last release from **[here](https://github.com/j4n7/bluepot/releases)** (EXE version).
 
 <p align="center">
@@ -54,10 +56,6 @@ This saves you the tedious task of having to fully start from the beginning.
 You can easily save this information for tracking your own progress but also for sharing it with other players.
 
 ***Take into account that it only registers 6 camps at maximum and crabs, drakes, herald and baron are excluded.***
-
-<p align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/7N-pLBgOYVw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
 
 
 
