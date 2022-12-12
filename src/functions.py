@@ -6,6 +6,12 @@ import urllib3
 from pathlib import Path
 from datetime import datetime, timedelta
 
+
+# FIX RELATIVE IMPORTS
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    pass
+else:
+    sys.path.append('.')
 from data.lol_live_urls import lol_live_game_stats_url, lol_live_game_events_url, lol_live_players_url
 
 

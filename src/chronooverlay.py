@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter.filedialog import asksaveasfile
 # from PIL import Image, ImageTk
 
+import sys
+import json
 import datetime
 
 import win32gui
@@ -11,7 +13,13 @@ import win32gui
 from pathlib import PurePath
 from pymem.exception import ProcessError, MemoryReadError
 
-from src.functions import format_time
+
+# FIX RELATIVE IMPORTS
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    from src.functions import format_time
+else:
+    sys.path.append('./src')
+    from functions import format_time
 
 
 # https://stackoverflow.com/questions/63047053/how-to-replace-a-background-image-in-tkinter
@@ -61,23 +69,33 @@ class ChronoOverlay(tk.Tk):
         self._offsetx = 0
         self._offsety = 0
 
-        # self.bind('<Escape>', self.close)
         self.bind('<Button-1>', self.click)
         self.bind('<B1-Motion>', self.drag)
 
-        self.set_geometry()
+        if hasattr(self.game, 'mockup'):
+            self.bind('<Escape>', self._close)
+            self.geometry("213x320")
+            self.eval('tk::PlaceWindow . center')
+        else:
+            self.set_geometry()
 
         self.set_title_bar()
         self.set_headers()
         self.set_labels()
 
-    def show(self, event):
+    def stop(self):
+        self.game.stop_jungle_chrono_time()
+
+    def reset(self):
+        self.reset_jungle_chrono()
+
+    def _show(self, event):
         self.deiconify()
 
-    def hide(self, event):
+    def _hide(self, event):
         self.withdraw()
 
-    def close(self, event):
+    def _close(self, event):
         self.quit()
 
     def drag(self, event):
@@ -199,19 +217,6 @@ class ChronoOverlay(tk.Tk):
             except AttributeError:
                 '''Save canceled'''
 
-        def reset_jungle_chrono():
-            for widget in self.winfo_children():
-                if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
-                    try:
-                        value = self.getvar(widget['textvariable'])
-                        if value not in ['', 'Start', 'End', 'Clear']:
-                            # widget.place_forget()
-                            widget.config(fg='#1F1F1F')
-                    except tk.TclError:
-                        pass
-
-            self.game.reset_jungle()
-
         # LOGO
         image = tk.PhotoImage(file=PurePath(path_img, 'potion.png'))
         image_logo = image.subsample(9)
@@ -227,7 +232,7 @@ class ChronoOverlay(tk.Tk):
         self.button_export = tk.Button(self, text='Export', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=export_jungle_chrono)
         self.button_export.place(x=106, y=10)
 
-        self.button_reset = tk.Button(self, text='Reset', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=reset_jungle_chrono)
+        self.button_reset = tk.Button(self, text='Reset', font=('Tahoma', 10, 'bold'), fg='white', bg='#1F1F1F', bd=0, pady=0, command=self.reset_jungle_chrono)
         self.button_reset.place(x=156, y=10)
 
     def set_headers(self):
@@ -264,10 +269,24 @@ class ChronoOverlay(tk.Tk):
                 # For first camp
                 step_info['start'] = '0:00.00'
 
-            if step_name == 'total' and step_info['end']:
-                step_info['end'] += '-'
+            # if step_name == 'total' and step_info['end']:
+            #     step_info['end'] += '-'
 
         return jungle_chrono
+
+    def reset_jungle_chrono(self):
+
+        self.game.reset_jungle()
+
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
+                try:
+                    value = self.getvar(widget['textvariable'])
+                    if value not in ['', 'Start', 'End', 'Clear']:
+                        # widget.place_forget()
+                        widget.config(fg='#1F1F1F')
+                except tk.TclError:
+                    pass
 
     def set_labels(self):
         spacing = 21
@@ -375,3 +394,90 @@ class ChronoOverlay(tk.Tk):
     def run(self):
         self.after(1, self.update_labels)
         self.mainloop()
+
+    def set_mockup(self):
+        def set_timedelta(seconds):
+            return datetime.timedelta(seconds=seconds)
+
+        jungle_chrono = {
+            'gromp_blue': {'name': 'Gromp', 'color': 'blue', 'start': set_timedelta(90), 'end': set_timedelta(103), 'total': set_timedelta(25)},
+            'moving_1': {'name': '..........', 'color': None, 'start': set_timedelta(103), 'end': set_timedelta(105), 'total': set_timedelta(2)},
+            'blue_blue': {'name': 'Blue', 'color': 'blue', 'start': set_timedelta(105), 'end': set_timedelta(123), 'total': set_timedelta(18)},
+            'moving_2': {'name': '..........', 'color': None, 'start': set_timedelta(123), 'end': set_timedelta(129), 'total': set_timedelta(6)},
+            'wolves_blue': {'name': 'Wolves', 'color': 'blue', 'start': set_timedelta(129), 'end': set_timedelta(142), 'total': set_timedelta(13)},
+            'moving_3': {'name': '..........', 'color': None, 'start': set_timedelta(142), 'end': set_timedelta(154), 'total': set_timedelta(12)},
+            'raptors_blue': {'name': 'Raptors', 'color': 'blue', 'start': set_timedelta(154), 'end': set_timedelta(166), 'total': set_timedelta(12)},
+            'moving_4': {'name': '..........', 'color': None, 'start': set_timedelta(166), 'end': set_timedelta(169), 'total': set_timedelta(3)},
+            'red_blue': {'name': 'Red', 'color': 'blue', 'start': set_timedelta(169), 'end': set_timedelta(187), 'total': set_timedelta(18)},
+            'moving_5': {'name': '..........', 'color': None, 'start': set_timedelta(187), 'end': set_timedelta(191), 'total': set_timedelta(4)},
+            'krugs_blue': {'name': 'Krugs', 'color': 'blue', 'start': set_timedelta(191), 'end': set_timedelta(200), 'total': set_timedelta(9)},
+            'total': {'name': 'TOTAL', 'color': 'yellow', 'start': '6camps', 'end': set_timedelta(200), 'total': set_timedelta(110)},
+        }
+
+        jungle_chrono = self.format_jungle_chrono(jungle_chrono)
+
+        # LABELS
+        n_row = 2
+        spacing = 21
+
+        for step_name, step_info in jungle_chrono.items():
+            # NAME
+            setattr(self, f'{n_row}_name_text', tk.StringVar())
+            text = getattr(self, f'{n_row}_name_text')
+            text.set(step_info['name'])
+
+            setattr(self, f'{n_row}_name_label', self.create_label(text, 10, step_info['color']))
+            label = getattr(self, f'{n_row}_name_label')
+
+            label.place(x=13, y=18 + n_row * spacing)
+
+            # START
+            setattr(self, f'{n_row}_start_text', tk.StringVar())
+            text = getattr(self, f'{n_row}_start_text')
+            text.set(step_info['start'])
+
+            setattr(self, f'{n_row}_start_label', self.create_label(text, 10, 'white'))
+            label = getattr(self, f'{n_row}_start_label')
+
+            label.place(x=self._padx + 66, y=19 + n_row * spacing)
+
+            # END
+            setattr(self, f'{n_row}_end_text', tk.StringVar())
+            text = getattr(self, f'{n_row}_end_text')
+            text.set(step_info['end'])
+
+            setattr(self, f'{n_row}_end_label', self.create_label(text, 10, 'green'))
+            label = getattr(self, f'{n_row}_end_label')
+
+            label.place(x=self._padx + 114, y=19 + n_row * spacing)
+
+            # CLEAR
+            setattr(self, f'{n_row}_clear_text', tk.StringVar())
+            text = getattr(self, f'{n_row}_clear_text')
+            text.set(step_info['total'])
+
+            setattr(self, f'{n_row}_clear_label', self.create_label(text, 10, 'yellow'))
+            label = getattr(self, f'{n_row}_clear_label')
+
+            label.place(x=self._padx + 162, y=19 + n_row * spacing)
+
+            n_row += 1
+
+
+if __name__ == '__main__':
+
+    class Game():
+        def __init__(self):
+            self.mockup = True
+
+        def get_jungle_chrono(self):
+            return
+
+        def reset_jungle(self):
+            return
+
+    game = Game()
+
+    overlay = ChronoOverlay(game)
+    overlay.set_mockup()
+    overlay.run()

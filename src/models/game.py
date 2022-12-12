@@ -46,6 +46,7 @@ class Game:
         self._init_jungle_camps()
 
         self._jungle_path = {}
+        self._jungle_camps_stopped = []
 
     @property
     def events(self):
@@ -391,16 +392,32 @@ class Game:
         last_step_name = list(self._jungle_path)[-1] if self._jungle_path else None
 
         for camp, info in camp_times.items():
+    
             if camp not in self._jungle_path and info[0]:
+
+                # SET PATH START TIME
                 if not self._jungle_path:
-                    self.clear_start = info[0]
-                self._jungle_path[camp] = {'name': 'Gromp', 'color': '#72a7e8', 'start': info[0] - self.clear_start, 'end': None, 'total': None}
+                    self.offset_start = self.jungle_camps_stored[camp]['initial_time']  # * Take into account the initial spawning time of the first camp being attacked
+                    self.path_start = info[0]
+
+                # SET CAMP START TIME
+                self._jungle_path[camp] = {'name': '', 'color': '', 'start': info[0] - self.path_start + self.offset_start, 'end': None, 'total': None}
+
+                # SET MOVING STOP TIME
                 if last_step_name and 'moving' in last_step_name:
-                    self._jungle_path[last_step_name]['end'] = info[0] - self.clear_start
+                    self._jungle_path[last_step_name]['end'] = info[0] - self.path_start + self.offset_start
                     self._jungle_path[last_step_name]['total'] = self._jungle_path[last_step_name]['end'] - self._jungle_path[last_step_name]['start']
-            elif camp in self._jungle_path and not self._jungle_path[camp]['end'] and info[1]:
-                self._jungle_path[camp]['end'] = info[1] - self.clear_start
-                self._jungle_path[camp]['total'] = self._jungle_path[camp]['end'] - self._jungle_path[camp]['start']
+
+            elif camp in self._jungle_path and not self._jungle_path[camp]['end']:
+                # CAMP DEAD
+                if info[1]:
+                    self._jungle_path[camp]['end'] = info[1] - self.path_start + self.offset_start
+                    self._jungle_path[camp]['total'] = self._jungle_path[camp]['end'] - self._jungle_path[camp]['start']
+                # CAMP MANUALLY STOPPED
+                else:
+                    if camp in self._jungle_camps_stopped:
+                        self._jungle_path[last_step_name]['end'] = self.time - self.path_start + self.offset_start
+                        self._jungle_path[camp]['total'] = self._jungle_path[camp]['end'] - self._jungle_path[camp]['start']
 
         camps_cleared = True
         for step_name, step_info in self._jungle_path.items():
@@ -445,6 +462,7 @@ class Game:
             camp_info['timer'] = None
 
         self._jungle_path = {}
+        self._jungle_camps_stopped = []
 
     def get_jungle_chrono(self):
         self._get_jungle_path()
@@ -465,10 +483,10 @@ class Game:
         n_camps = 0
         end_current = timedelta(seconds=0)
         for step_name, step_info in self._jungle_path.items():
-            if self.clear_start and n_step <= 10 and n_camps <= 5:  # * Max overlay space
+            if self.path_start and n_step <= 10 and n_camps <= 5:  # * Max overlay space
 
                 end_current = step_info['end'] if step_info['end'] and step_info['end'] > end_current and step_info['total'] else end_current
-                clear_current = (self.time - self.clear_start)
+                clear_current = self.time - self.path_start + self.offset_start
 
                 start = step_info['start'] if step_info['start'] else timedelta(seconds=0)
                 end = step_info['end'] if step_info['end'] else (clear_current if clear_current else timedelta(seconds=0))
@@ -486,6 +504,11 @@ class Game:
                                       'color': None,
                                       'start': f'{n_camps}camps',
                                       'end': end_current if end_current else '',
-                                      'total': end_current + timedelta(seconds=90) if end_current else ''}
+                                      'total': end_current - self.offset_start if end_current else ''}
 
         return jungle_chrono
+
+    def stop_jungle_chrono_time(self):
+        last_step_name = list(self._jungle_path)[-1] if self._jungle_path else None
+        if last_step_name and not last_step_name.startswith('moving'):
+            self._jungle_camps_stopped.append(last_step_name)

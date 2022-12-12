@@ -1,6 +1,8 @@
 pywin32
 requests
 beautifulsoup4
+lxml
 infi.systray
 pymem
 pyinstaller
+keyboard

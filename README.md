@@ -1,5 +1,7 @@
 # BluePot
 
+**_Updated to LOL patch 12.23_**
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/j4n7/bluepot/master/src/img/potion.png?raw=true" alt="LOLFF15 Logo" width="32" height="32">
 </p>
@@ -119,6 +121,14 @@ TOTAL                         2:08.22   3:38.22*
 * Starting at 1:30
 ```
 
+
+## Hotkeys for the Jungle Path Chronometer
+
+**Stop** [Pause key]: this manually stops the camp timer. This can be useful, for example if you want to time the last hit of a monster before it dies.
+
+**Reset** [Backspace key]: this restarts the chronometer, erasing all the stored information. Can be useful to start a new run. There is also a button at the top of the overlay.
+
+BluePot comes along with a **hotkeys_settings.txt file**. You can modify its contents (e.g. Windows Notepad) to assign different hotkeys for these functions. This file has to be in the same directory as the Executable file, otherwise changes won't apply.
 
 
 ## Advantages of the Jungle Path Chronometer
