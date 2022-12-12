@@ -1,0 +1,31 @@
+# PLEASE, DON'T CHANGE THE FILE OTHER THAN FOLLOWING THE INSTRUCTIONS BELOW
+
+# Remove hash symbol (#) at the beginning of the key you want to use as your hotkey
+# By default <Pause key> is assigned to STOP
+# By default <Backspace key> is assigned to RESET
+
+# ---STOP ---
+
+#Page Up
+#Page Down
+#Pause
+#Backspace
+#Delete
+#F6
+#F7
+#F8
+#F10
+#F11
+
+# ---RESET---
+
+#Page Up
+#Page Down
+#Pause
+#Backspace
+#Delete
+#F6
+#F7
+#F8
+#F10
+#F11
