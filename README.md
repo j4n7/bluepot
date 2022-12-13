@@ -37,7 +37,7 @@ Currently BluePot is released as a **Windows Exectuable** that implements an ove
 
 BluePot Windows Exectuable provides an **overlay that features a jungle path chronometer**.
 
-You may check it out in this **[YouTube video](https://www.youtube.com/watch?v=7N-pLBgOYVw)**.
+You may check it out in this **[YouTube video](https://www.youtube.com/watch?v=Lm62jbqlmLQ)**.
 
 You can get the last release from **[here](https://github.com/j4n7/bluepot/releases)** (EXE version).
 
