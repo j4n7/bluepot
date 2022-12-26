@@ -4,6 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 from pymem.exception import MemoryReadError
 
+from .cursor import Cursor
 from .chat import Chat
 from .entity import Entity
 from .entitymanager import EntityManager
@@ -16,15 +17,16 @@ import data.offsets as offsets
 class Game:
     game_time_offset = offsets.game_time
 
-    minimap_hud_offset = offsets.minimap_hud
-    minimap_hud_layer_offset = offsets.minimap_hud_layer
-    minimap_hud_size_a_offset = offsets.minimap_hud_size_a
-    minimap_hud_size_b_offset = offsets.minimap_hud_size_b
+    minimap_offset = offsets.minimap
+    minimap_data_offset = offsets.minimap_data
+    minimap_data_size_a_offset = offsets.minimap_data_size_a
+    minimap_data_size_b_offset = offsets.minimap_data_size_b
 
     local_player_offset = offsets.local_player
     minion_manager_offset = offsets.minion_manager
     champion_manager_offset = offsets.champion_manager
     tower_manager_offsset = offsets.tower_manager
+    missile_manager_offsset = offsets.missile_manager
 
     server_tick_time = 0.033  # https://leagueoflegends.fandom.com/wiki/Tick_and_updates
 
@@ -34,11 +36,14 @@ class Game:
 
         self.patch_version = offsets.patch_version
 
+        self.cursor = Cursor(pm)
+
         self.local_player = Entity(pm, pm.read_int(pm.base_address + Game.local_player_offset))
 
         self.minion_manager = EntityManager(pm, Game.minion_manager_offset)
         self.champion_manager = EntityManager(pm, Game.champion_manager_offset)
         self.tower_manager = EntityManager(pm, Game.tower_manager_offsset)
+        self.missile_manager = EntityManager(pm, Game.missile_manager_offsset)
 
         self.object_manager = ObjectManager(pm)
 
@@ -59,16 +64,16 @@ class Game:
 
     @property
     def minimap_resolution(self):
-        minimap_hud_address = self.pm.read_int(self.pm.base_address + Game.minimap_hud_offset)
-        pointer = minimap_hud_address + Game.minimap_hud_layer_offset
-        minimap_hud_layer_address = self.pm.read_int(pointer)
-        minimap_hud_size_a = self.pm.read_float(minimap_hud_layer_address + Game.minimap_hud_size_a_offset)
-        minimap_hud_size_b = self.pm.read_float(minimap_hud_layer_address + Game.minimap_hud_size_b_offset)
+        minimap_address = self.pm.read_int(self.pm.base_address + Game.minimap_offset)
+        pointer = minimap_address + Game.minimap_data_offset
+        minimap_data_address = self.pm.read_int(pointer)
+        minimap_data_size_a = self.pm.read_float(minimap_data_address + Game.minimap_data_size_a_offset)
+        minimap_data_size_b = self.pm.read_float(minimap_data_address + Game.minimap_data_size_b_offset)
 
-        return {'width': minimap_hud_size_a, 'height': minimap_hud_size_b}
+        return {'width': minimap_data_size_a, 'height': minimap_data_size_b}
 
     @property
-    def jungle_monsters(self):
+    def jungle_monsters_memory(self):
         for minion in self.minion_manager.entities:
             if minion.category == 'jungle_monster':
                 yield minion
@@ -99,7 +104,7 @@ class Game:
             monster_info['death_time'] = None
             monster_info['death_visible'] = None
 
-        for jungle_monster in self.jungle_monsters:
+        for jungle_monster in self.jungle_monsters_memory:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
@@ -135,7 +140,7 @@ class Game:
             camp_info['timer_time'] = parse_time(camp_info['timer_time'])
 
     def _update_jungle_monsters(self):
-        for jungle_monster in self.jungle_monsters:
+        for jungle_monster in self.jungle_monsters_memory:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
@@ -176,7 +181,9 @@ class Game:
                                 self._krugs_mini[color] = {'alive': [], 'dead': []}
 
                         # MONSTER ATTACKED
-                        elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked:
+                        # ! Not working when monster is attacked out of vision
+                        elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked(self.time):
+                            # print('MONSTER ATTACKED', jungle_monster.name, self.time)
                             jungle_monster_stored['attack_time'] = self.time
 
             # ? Not sure if I need <UnicodeDecodeError> here
