@@ -212,7 +212,7 @@ class Entity:
         is_dead = self.pm.read_int(self.address + Entity.is_dead_offset)
         return True if is_dead % 2 != 0 else False
 
-    # @needs_vision
+    @needs_vision
     def has_been_attacked(self, game_time):
         if self.health_ratio != 1:
             return True
