@@ -1,22 +1,20 @@
 import json
 from threading import Thread
-from functools import cached_property
 from datetime import timedelta
-from pathlib import Path
-from pymem.exception import MemoryReadError, ProcessError
+from pymem.exception import MemoryReadError
 
 from .cursor import Cursor
 from .chat import Chat
 from .entity import Entity
+from .manager import Manager
 from .entitymanager import EntityManager
-from .objectmanager import ObjectManager
 
 from src.functions import get_base_dir, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
 class Game:
-    patch_version = offsets.patch_version
+    version = offsets.version
     game_time_offset = offsets.game_time
 
     minimap_offset = offsets.minimap
@@ -24,32 +22,33 @@ class Game:
     minimap_data_size_a_offset = offsets.minimap_data_size_a
     minimap_data_size_b_offset = offsets.minimap_data_size_b
 
-    local_player_offset = offsets.local_player
-    minion_manager_offset = offsets.minion_manager
-    champion_manager_offset = offsets.champion_manager
+    unit_manager_offset = offsets.unit_manager
     tower_manager_offsset = offsets.tower_manager
     missile_manager_offsset = offsets.missile_manager
+    champion_manager_offset = offsets.champion_manager
+
+    champion_local_offset = offsets.champion_local
 
     server_tick_time = 0.033  # https://leagueoflegends.fandom.com/wiki/Tick_and_updates
 
     def __init__(self, pm):
         self.pm = pm
 
-        self.patch_version = Game.patch_version
+        self.version = Game.version
 
         self.chat = Chat(pm)
         self.cursor = Cursor(pm)
 
-        self.local_player = Entity(pm, pm.read_int(pm.base_address + Game.local_player_offset))
+        self.champion_local = Entity(pm, pm.read_int(pm.base_address + Game.champion_local_offset))
 
-        self.minion_manager = EntityManager(pm, Game.minion_manager_offset)
-        self.champion_manager = EntityManager(pm, Game.champion_manager_offset)
-        self.tower_manager = EntityManager(pm, Game.tower_manager_offsset)
-        self.missile_manager = EntityManager(pm, Game.missile_manager_offsset)
+        self.unit_manager = Manager(pm, Game.unit_manager_offset)
+        self.champion_manager = Manager(pm, Game.champion_manager_offset)
+        self.tower_manager = Manager(pm, Game.tower_manager_offsset)
+        self.missile_manager = Manager(pm, Game.missile_manager_offsset)
 
-        self.object_manager = ObjectManager(pm)
+        self.entity_manager = EntityManager(pm)
 
-        self.local_player.set_spells(lambda: self.time)
+        self.champion_local.set_spells(lambda: self.time)
 
         self._init_game()
         self._init_jungle_path()
@@ -91,15 +90,15 @@ class Game:
 
     @property
     def jungle_monsters_memory(self):
-        for minion in self.minion_manager.entities:
-            if minion.category == 'jungle_monster':
-                yield minion
+        for unit in self.unit_manager.entities:
+            if unit.category == 'jungle_monster':
+                yield unit
 
     @property
     def jungle_camp_respawns(self):
-        for minion in self.minion_manager.entities:
-            if minion.category == 'jungle_camp_resapwn':
-                yield minion
+        for unit in self.unit_manager.entities:
+            if unit.category == 'jungle_camp_resapwn':
+                yield unit
 
     def _init_game(self):
         self.time_start = timedelta(seconds=0)
@@ -112,9 +111,9 @@ class Game:
         self._jungle_camps_stopped = []
 
     def _init_jungle_smite(self):
-        self._smite_time_ready = None
-        if hasattr(self.local_player.spells.summoner, 'Smite'):
-            self._smite_time_ready = self.local_player.spells.summoner.Smite.time_ready
+        self._smite_cooldown_game_time = None
+        if hasattr(self.champion_local.spells.summoner, 'Smite'):
+            self._smite_cooldown_game_time = self.champion_local.spells.summoner.Smite.cooldown_game_time
         self._smite_time_first_casted = None
         self._smite_charges_n = 1  # Smite always starts with 1 charge
         self._smite_invalid = False
@@ -190,10 +189,10 @@ class Game:
         self.restarts = restarts
 
     def _update_jungle_smite(self):
-        if hasattr(self.local_player.spells.summoner, 'Smite'):
-            # * Smite's time_ready starts around ~ 15 s (15.029, 15.033, ...) because it's on a 15 s cooldown.
-            # * Smite's time_ready updates to ~ 87 s (87.251) around 1:27
-            # * Smite's time_ready updates to ~ 90 s (90.056) around 1:30
+        if hasattr(self.champion_local.spells.summoner, 'Smite'):
+            # * Smite's cooldown_game_time starts around ~ 15 s (15.029, 15.033, ...) because it's on a 15 s cooldown.
+            # * Smite's cooldown_game_time updates to ~ 87 s (87.251) around 1:27
+            # * Smite's cooldown_game_time updates to ~ 90 s (90.056) around 1:30
             # * Smite can't be casted before 1:30 under normal situations (no monsters, cannons or champs available).
             # * Therefore, until 1:27 (~ 87.251 s), smite charges are not updated properly.
 
@@ -201,24 +200,24 @@ class Game:
             self._last_hovered_monster_name = self.cursor.entity_hovered.name if self.cursor.entity_hovered.name in self.jungle_monsters_stored else self._last_hovered_monster_name
 
             if self.time > timedelta(seconds=87):
-                if self.local_player.spells.summoner.Smite.charges_n != self._smite_charges_n:
-                    if self.local_player.spells.summoner.Smite.charges_n > self._smite_charges_n:
-                        print('Smite increased:', 'Before', self._smite_charges_n, 'Now', self.local_player.spells.summoner.Smite.charges_n)
-                    elif self.local_player.spells.summoner.Smite.charges_n < self._smite_charges_n:
-                        if self._smite_time_first_casted and self.time - self._smite_time_first_casted < time_ready(seconds=90):
+                if self.champion_local.spells.summoner.Smite.charges_n != self._smite_charges_n:
+                    if self.champion_local.spells.summoner.Smite.charges_n > self._smite_charges_n:
+                        print('Smite increased:', 'Before', self._smite_charges_n, 'Now', self.champion_local.spells.summoner.Smite.charges_n)
+                    elif self.champion_local.spells.summoner.Smite.charges_n < self._smite_charges_n:
+                        if self._smite_time_first_casted and self.time - self._smite_time_first_casted < cooldown_game_time(seconds=90):
                             # SMITE INVALID
                             print('INVALID SMITE')
                             self._smite_invalid = True
                         else:
                             monster_name = self._last_hovered_monster_name
                             if monster_name:
-                                print('Smite casted:', monster_name, 'Before', self._smite_charges_n, 'Now', self.local_player.spells.summoner.Smite.charges_n)
+                                print('Smite casted:', monster_name, 'Before', self._smite_charges_n, 'Now', self.champion_local.spells.summoner.Smite.charges_n)
                                 self._smite_time_first_casted = self.time if not self._smite_time_first_casted else self._smite_time_first_casted
                                 self.jungle_monsters_stored[monster_name]['is_smited'] = True
-                    self._smite_charges_n = self.local_player.spells.summoner.Smite.charges_n
+                    self._smite_charges_n = self.champion_local.spells.summoner.Smite.charges_n
             else:
-                time_ready = self.local_player.spells.summoner.Smite.time_ready
-                if time_ready != self._smite_time_ready:
+                cooldown_game_time = self.champion_local.spells.summoner.Smite.cooldown_game_time
+                if cooldown_game_time != self._smite_cooldown_game_time:
                     if self._smite_time_first_casted and self.time - self._smite_time_first_casted < timedelta(seconds=90):
                         # SMITE INVALID
                         print('INVALID SMITE (< 1:30)')
@@ -226,10 +225,10 @@ class Game:
                     else:
                         monster_name = self._last_hovered_monster_name
                         if monster_name:
-                            print('Smite casted (< 1:30):', monster_name, 'Before', self._smite_time_ready, 'Now', time_ready)
+                            print('Smite casted (< 1:30):', monster_name, 'Before', self._smite_cooldown_game_time, 'Now', cooldown_game_time)
                             self._smite_time_first_casted = self.time if not self._smite_time_first_casted else self._smite_time_first_casted
                             self.jungle_monsters_stored[monster_name]['is_smited'] = True  
-                    self._smite_time_ready = time_ready                
+                    self._smite_cooldown_game_time = cooldown_game_time                
 
     def _update_jungle_monsters(self):
         for jungle_monster in self.jungle_monsters_memory:
@@ -381,7 +380,7 @@ class Game:
                         camp_is_death_visible = False
 
                 # CAMP SMITED
-                if hasattr(self.local_player.spells.summoner, 'Smite'):
+                if hasattr(self.champion_local.spells.summoner, 'Smite'):
                     camp_is_smited = True if True in [self.jungle_monsters_stored[monster]['is_smited'] for monster in camp_stored_info['monsters']] else False
                     if camp_is_smited and not camp_stored_info['is_smited']:
                         # print('CAMP SMITED', camp_name)

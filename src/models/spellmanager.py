@@ -3,10 +3,13 @@ import data.offsets as offsets
 
 
 class SpellManager:
+    spell_book_offset = offsets.entity_spell_book
+    spell_book_slots_offset = offsets.entity_spell_book_slots
+
     def __init__(self, pm, entity_address):
         self.pm = pm
         self.entity_address = entity_address
-        self.address = entity_address + offsets.spell_manager
+        self.address = entity_address + SpellManager.spell_book_offset + SpellManager.spell_book_slots_offset
 
     @property
     def spells(self):

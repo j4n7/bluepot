@@ -156,10 +156,10 @@ class BluePot():
             if self._game:
                 return self._game
 
-    def get_local_player(self):
+    def get_champion_local(self):
         while True:
-            if self._game and self._game.local_player:
-                return self._game.local_player
+            if self._game and self._game.champion_local:
+                return self._game.champion_local
 
     def start(self):
         '''The order of execution of these methods is non trivial.'''
@@ -174,5 +174,5 @@ if __name__ == '__main__':
 
     game = bluepot.get_game()
     chat = game.chat
-    local_player = game.local_player
-    champion_name = game.local_player.name
+    champion_local = game.champion_local
+    champion_name = game.champion_local.name

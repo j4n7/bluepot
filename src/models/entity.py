@@ -22,15 +22,15 @@ with open(data_dir / 'jungle_camps.json') as json_file:
 
 
 class Entity:
-    name_offset = offsets.name
-    name_full_offset = offsets.name_full
-    position_offset = offsets.position
-    is_visible_offset = offsets.is_visible
-    mana_offset = offsets.mana
-    mana_max_offset = offsets.mana_max
-    health_offset = offsets.health
-    health_max_offset = offsets.health_max
-    is_dead_offset = offsets.is_dead_ofuscated_n
+    name_offset = offsets.entity_name
+    name_full_offset = offsets.entity_name_full
+    pos_offset = offsets.entity_pos
+    is_visible_offset = offsets.entity_is_visible
+    mana_offset = offsets.entity_mana
+    mana_max_offset = offsets.entity_mana_max
+    health_offset = offsets.entity_health
+    health_max_offset = offsets.entity_health_max
+    is_dead_offset = offsets.entity_is_dead_ofuscated_n
 
     jungle_camps = jungle_camps
     jungle_monsters = jungle_monsters
@@ -81,7 +81,7 @@ class Entity:
             except UnicodeDecodeError:
                 pass
         except MemoryReadError:
-            '''Entity from object manager'''
+            '''Entity from entity manager'''
         return name_memory
 
     @cached_property
@@ -164,9 +164,9 @@ class Entity:
     @property
     # @needs_vision
     def position(self):
-        x = self.pm.read_float(self.address + Entity.position_offset)
-        y = self.pm.read_float(self.address + Entity.position_offset + 0x8)
-        z = self.pm.read_float(self.address + Entity.position_offset + 0x4)
+        x = self.pm.read_float(self.address + Entity.pos_offset)
+        y = self.pm.read_float(self.address + Entity.pos_offset + 0x8)
+        z = self.pm.read_float(self.address + Entity.pos_offset + 0x4)
         return {"x": x, "y": y, "z": z}
 
     @property
@@ -176,14 +176,14 @@ class Entity:
         return mana
 
     @cached_property
-    def mana_max(self):
-        mana_max = self.pm.read_float(self.address + Entity.mana_max_offset)
-        return mana_max
+    def entity_mana_max(self):
+        entity_mana_max = self.pm.read_float(self.address + Entity.mana_max_offset)
+        return entity_mana_max
 
     @property
     # @needs_vision
-    def mana_ratio(self):
-        return self.mana / self.mana_max
+    def entity_mana_ratio(self):
+        return self.mana / self.entity_mana_max
 
     @property
     # @needs_vision
@@ -193,14 +193,14 @@ class Entity:
         return health
 
     @cached_property
-    def health_max(self):
-        health_max = self.pm.read_float(self.address + Entity.health_max_offset)
-        return health_max
+    def entity_health_max(self):
+        entity_health_max = self.pm.read_float(self.address + Entity.health_max_offset)
+        return entity_health_max
 
     @property
     # @needs_vision
-    def health_ratio(self):
-        return self.health / self.health_max
+    def entity_health_ratio(self):
+        return self.health / self.entity_health_max
 
     # @property
     # def is_dead(self):
@@ -214,7 +214,7 @@ class Entity:
 
     @needs_vision
     def has_been_attacked(self, game_time):
-        if self.health_ratio != 1:
+        if self.entity_health_ratio != 1:
             return True
         for buff in self.buff_manager.buffs:
             if buff.name not in Entity.jungle_buffs and game_time <= buff.end_time:

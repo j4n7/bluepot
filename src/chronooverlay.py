@@ -197,7 +197,7 @@ class ChronoOverlay(tk.Tk):
                 return
 
             file_time = datetime.datetime.now().strftime("%d-%m-%Y__%H-%M-%S")
-            file_name = f'BluePot__{self.game.local_player.name}__{self.game.patch_version}__{file_time}.txt'
+            file_name = f'BluePot__{self.game.champion_local.name}__{self.game.version}__{file_time}.txt'
             file_types = [("All Files", "*.*"), ("Text Documents", "*.txt")]
             file_open = asksaveasfile(initialfile=file_name,
                                       defaultextension=".txt",
@@ -207,8 +207,8 @@ class ChronoOverlay(tk.Tk):
                           'Created by BluePot\n',
                           'Player name: <fill>\n',
                           '-----------------------------\n',
-                          f'LOL version: {self.game.patch_version}\n',
-                          f'Champion name: {self.game.local_player.name}\n',
+                          f'LOL version: {self.game.version}\n',
+                          f'Champion name: {self.game.champion_local.name}\n',
                           '-----------------------------\n',
                           'Starting side: <fill>\n',
                           f'Number of camps: {camps_n}\n',
