@@ -1,19 +1,24 @@
 import json
+import requests
 
-from src.functions import get_base_dir
-
-
-def get_offset(entry):
-    def hex_to_int(str_):
-        return int(str_, 16)
-    return hex_to_int(entry['value'])
+from src.functions import get_base_dir, offsets_need_update, get_offset
 
 
 base_dir = get_base_dir()
 data_dir = base_dir / 'data'
 
+request = requests.get('https://raw.githubusercontent.com/j4n7/bluepot/develop/data/offsets.json')
+remote = request.json()
+
 with open(data_dir / 'offsets.json') as json_file:
-    offsets = json.load(json_file)
+    local = json.load(json_file)
+
+if offsets_need_update(remote, local):
+    with open(data_dir / 'offsets.json', 'w') as json_file:
+        json.dump(remote, json_file)
+    offsets = remote
+else:
+    offsets = local
 
 # ____________________________________________________________________________
 

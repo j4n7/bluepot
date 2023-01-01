@@ -26,7 +26,21 @@ def get_base_dir():
     else:
         base_dir = Path(__file__).parent.parent
     return base_dir
-    
+
+
+def get_offset(entry):
+    def hex_to_int(str_):
+        return int(str_, 16)
+    return hex_to_int(entry['value'])
+
+
+def offsets_need_update(remote, local):
+    remote = [int(n) for n in remote['version'].split('.')]
+    local = [int(n) for n in local['version'].split('.')]
+    if remote[0] > local[0] or remote[1] > local[1]:
+        return True
+    return False
+
 
 def get_game_stats():
     game_stats_request = requests.get(lol_live_game_stats_url, verify=False)
