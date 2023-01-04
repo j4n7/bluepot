@@ -24,6 +24,7 @@ with open(data_dir / 'jungle_camps.json') as json_file:
 class Entity:
     name_offset = offsets.entity_name
     name_full_offset = offsets.entity_name_full
+    team_offset = offsets.entity_team
     pos_offset = offsets.entity_pos
     is_visible_offset = offsets.entity_is_visible
     mana_offset = offsets.entity_mana
@@ -31,6 +32,8 @@ class Entity:
     health_offset = offsets.entity_health
     health_max_offset = offsets.entity_health_max
     is_dead_offset = offsets.entity_is_dead_ofuscated_n
+
+    summoner_name_offset = offsets.champion_summoner_name
 
     jungle_camps = jungle_camps
     jungle_monsters = jungle_monsters
@@ -157,6 +160,11 @@ class Entity:
             return 'champion'
 
     @property
+    def team(self):
+        team = self.pm.read_short(self.address + Entity.team_offset)
+        return 'blue' if team == 100 else 'red'
+
+    @property
     def is_visible(self):
         is_visible = self.pm.read_bool(self.address + Entity.is_visible_offset)
         return is_visible
@@ -211,6 +219,11 @@ class Entity:
         # * Superior approach
         is_dead = self.pm.read_int(self.address + Entity.is_dead_offset)
         return True if is_dead % 2 != 0 else False
+
+    @property
+    def summoner_name(self):
+        summoner_name = self.pm.read_string(self.address + Entity.summoner_name_offset)
+        return summoner_name
 
     @needs_vision
     def has_been_attacked(self, game_time):

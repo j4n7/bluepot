@@ -88,7 +88,7 @@ champion_manager = get_offset(offsets['champion']['manager'])
 
 champion_local = get_offset(offsets['champion']['local'])
 
-# champion_summoner_name = get_offset(offsets['champion']['summoner_name'])
+champion_summoner_name = get_offset(offsets['champion']['summoner_name'])
 # champion_summoner_name_len = get_offset(offsets['champion']['summoner_name_len'])
 
 # champion_recall_state = get_offset(offsets['champion']['recall_state'])
@@ -106,7 +106,7 @@ entity_manager_list_len = get_offset(offsets['entity']['manager'][1]['list_len']
 # entity_manager_last = get_offset(offsets['entity']['manager'][1]['last'])
 
 # entity_index = get_offset(offsets['entity']['index'])
-# entity_team = get_offset(offsets['entity']['team'])
+entity_team = get_offset(offsets['entity']['team'])
 entity_name_full = get_offset(offsets['entity']['name_full'])
 entity_pos = get_offset(offsets['entity']['pos'])
 entity_is_visible = get_offset(offsets['entity']['is_visible'])

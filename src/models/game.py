@@ -9,12 +9,13 @@ from .entity import Entity
 from .manager import Manager
 from .entitymanager import EntityManager
 
-from src.functions import get_base_dir, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
+from src.functions import get_base_dir, get_game_info, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
 class Game:
     version = offsets.version
+    patch_offset = offsets.patch
     game_time_offset = offsets.game_time
 
     minimap_offset = offsets.minimap
@@ -33,6 +34,8 @@ class Game:
 
     def __init__(self, pm):
         self.pm = pm
+
+        self.id, self.region = get_game_info()
 
         self.version = Game.version
 
@@ -61,6 +64,11 @@ class Game:
     @property
     def events(self):
         return get_game_events()
+
+    @property
+    def patch(self):
+        patch = self.pm.read_string(self.pm.base_address + Game.patch_offset)
+        return patch
 
     @property
     def time_real(self):
@@ -103,7 +111,7 @@ class Game:
     def _init_game(self):
         self.time_start = timedelta(seconds=0)
         self.restarts = 0
-        # self.reset = False
+        self.reset = False
 
     def _init_jungle_path(self):
         self._jungle_path_offset_time = None
@@ -185,6 +193,7 @@ class Game:
         if restarts > self.restarts:
             # print('Game started', self.time_start, 'Time', self.time, 'Restarts', restarts)
             self.time_start = self.time_real
+            self.reset = True
             self.reset_jungle()
         self.restarts = restarts
 

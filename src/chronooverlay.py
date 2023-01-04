@@ -17,9 +17,11 @@ from pymem.exception import ProcessError
 # FIX RELATIVE IMPORTS
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     from src.functions import format_time
+    from src.chronoexporter import ChronoExporter
 else:
     sys.path.append('./src')
     from functions import format_time
+    from chronoexporter import ChronoExporter
 
 
 # https://stackoverflow.com/questions/63047053/how-to-replace-a-background-image-in-tkinter
@@ -84,6 +86,8 @@ class ChronoOverlay(tk.Tk):
         self.set_title_bar()
         self.set_headers()
         self.set_labels()
+
+        self.chrono_exporter = ChronoExporter(self.game)
 
     def terminate(self):
         self._terminate = True
@@ -163,70 +167,34 @@ class ChronoOverlay(tk.Tk):
                         padx=0,
                         pady=0)
 
+    def create_button(self, text, size, color, n):
+        def set_is_smited(n):
+            button = getattr(self, f'{n}_name_button')
+            name = button.cget('text')
+            if name not in ['..........', 'TOTAL']:
+                name = name.lower()
+                color = 'blue' if button.cget('fg') == '#72A7E8' else 'red'
+                jungle_camp = f'{name}_{color}'
+                self.game._jungle_path[jungle_camp]['is_smited'] = not self.game._jungle_path[jungle_camp]['is_smited']
+                if self.game._jungle_path[jungle_camp]['is_smited']:
+                    button.config(font=('Tahoma', 10, 'underline'))
+                else:
+                    button.config(font=('Tahoma', 10,))
+
+        return tk.Button(self,
+                         textvariable=text,
+                         font=('Tahoma', size),
+                         fg=color,
+                         bg='#1F1F1F',  # Color from image
+                         bd=0,  # Important to adjust borders
+                         padx=0,
+                         pady=0,
+                         command=lambda: set_is_smited(n))
+
     def set_title_bar(self):
         def export_jungle_chrono():
-            def format_jungle_lines(jungle_chrono):
-                camps_n = None
-                jungle_lines = []
-                for step_name, step_info in jungle_chrono.items():
-
-                    name = step_info['name']
-                    if step_name.startswith('moving'):
-                        name, number = step_name.split('_')
-                        name = f'M{number}'
-
-                    start = step_info['start']
-                    if step_name == 'total':
-                        camps_n = step_info['start'][0]
-                        start = ''
-
-                    color = step_info['color'].capitalize() if step_info['color'] else ''
-                    total = step_info['total'] if step_name != 'total' else f"{step_info['total']}*"
-
-                    line = f"{name.ljust(7)}   {color.ljust(7)}   {start.ljust(7)}   {step_info['end'][:7]}   {total}\n"
-                    jungle_lines.append(line)
-                    jungle_lines.append('---------------------------------------------------------\n')
-
-                return camps_n, jungle_lines
-
             jungle_chrono = self.format_jungle_chrono(self.get_jungle_chrono(), format_color=False)
-            try:
-                camps_n, jungle_lines = format_jungle_lines(jungle_chrono)
-            except AttributeError:
-                '''Trying to export without clearing a single camp'''
-                return
-
-            file_time = datetime.datetime.now().strftime("%d-%m-%Y__%H-%M-%S")
-            file_name = f'BluePot__{self.game.champion_local.name}__{self.game.version}__{file_time}.txt'
-            file_types = [("All Files", "*.*"), ("Text Documents", "*.txt")]
-            file_open = asksaveasfile(initialfile=file_name,
-                                      defaultextension=".txt",
-                                      filetypes=file_types)
-
-            file_lines = ['-----------------------------\n',
-                          'Created by BluePot\n',
-                          'Player name: <fill>\n',
-                          '-----------------------------\n',
-                          f'LOL version: {self.game.version}\n',
-                          f'Champion name: {self.game.champion_local.name}\n',
-                          '-----------------------------\n',
-                          'Starting side: <fill>\n',
-                          f'Number of camps: {camps_n}\n',
-                          '-----------------------------\n'
-                          '\n\n',
-                          '---------------------------------------------------------\n',
-                          'CAMPS     COLOR     START     END       TOTAL     SMITE  \n',
-                          '---------------------------------------------------------\n'
-                          ]
-
-            file_lines += jungle_lines + ['\n* Starting at 1:30\n']
-
-            try:
-                if file_open:
-                    with file_open as file:
-                        file.writelines(file_lines)
-            except AttributeError:
-                '''Save canceled'''
+            self.chrono_exporter.export(jungle_chrono)
 
         # LOGO
         image = tk.PhotoImage(file=PurePath(path_img, 'potion.png'))
@@ -326,6 +294,7 @@ class ChronoOverlay(tk.Tk):
 
     def reset_jungle_chrono(self):
         self.game.reset_jungle()
+        self.game.reset = True
         for widget in self.winfo_children():
             if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
                 try:
@@ -363,9 +332,10 @@ class ChronoOverlay(tk.Tk):
             setattr(self, f'{n}_name_text', tk.StringVar())
             text = getattr(self, f'{n}_name_text')
 
-            setattr(self, f'{n}_name_label', self.create_label(text, 10, 'white'))
-            label = getattr(self, f'{n}_name_label')
-            label.place(x=13, y=18 + n * spacing)
+            setattr(self, f'{n}_name_button', self.create_button(text, 10, 'white', n))
+            button = getattr(self, f'{n}_name_button')
+            button.config(font=('Tahoma', 10,)) if self.game.reset else None
+            button.place(x=13, y=16 + n * spacing)
 
             # START
             setattr(self, f'{n}_start_text', tk.StringVar())
@@ -398,6 +368,14 @@ class ChronoOverlay(tk.Tk):
         if self._terminate:
             '''Game finished'''
             self.destroy()
+
+        # DELETE UNDERLINES
+        if self.game.reset:
+            for n in range(2, 14):
+                button = getattr(self, f'{n}_name_button')
+                button.config(font=('Tahoma', 10,))
+            self.chrono_exporter.saves_n = 0
+            self.game.reset = False
 
         # FIRST ERASE CURRENT TEXT
         for n in range(2, 14):
@@ -440,14 +418,14 @@ class ChronoOverlay(tk.Tk):
             try:
                 if self.game._smite_invalid:
 
-                    label_2 = getattr(self, '2_name_label')
-                    label_2.config(font=('Tahoma', 10), fg='#E87272')
+                    button_2 = getattr(self, '2_name_button')
+                    button_2.config(font=('Tahoma', 10), fg='#E87272')
 
                     text_2 = getattr(self, '2_name_text')
                     text_2.set('INVALID SMITE')
 
-                    label_3 = getattr(self, '3_name_label')
-                    label_3.config(font=('Tahoma', 10), fg='#E87272')
+                    button_3 = getattr(self, '3_name_button')
+                    button_3.config(font=('Tahoma', 10), fg='#E87272')
 
                     text_3 = getattr(self, '3_name_text')
                     text_3.set('RESTART GAME')
@@ -455,12 +433,8 @@ class ChronoOverlay(tk.Tk):
                     n = 2
                     for step_name, step_info in jungle_chrono.items():
                         # NAME
-                        label = getattr(self, f'{n}_name_label')
-                        label.config(fg=step_info['color'])
-                        if step_info['is_smited']:
-                            label.config(font=('Tahoma', 10, 'underline'))
-                        else:
-                            label.config(font=('Tahoma', 10,))
+                        button = getattr(self, f'{n}_name_button')
+                        button.config(fg=step_info['color'])
 
                         text = getattr(self, f'{n}_name_text')
                         text.set(step_info['name'])
@@ -527,10 +501,9 @@ class ChronoOverlay(tk.Tk):
             text = getattr(self, f'{n_row}_name_text')
             text.set(step_info['name'])
 
-            setattr(self, f'{n_row}_name_label', self.create_label(text, 10, step_info['color']))
-            label = getattr(self, f'{n_row}_name_label')
-
-            label.place(x=13, y=18 + n_row * spacing)
+            setattr(self, f'{n_row}_name_button', self.create_button(text, 10, step_info['color'], n_row))
+            button = getattr(self, f'{n_row}_name_button')
+            button.place(x=13, y=16 + n_row * spacing)
 
             # START
             setattr(self, f'{n_row}_start_text', tk.StringVar())
@@ -539,7 +512,6 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n_row}_start_label', self.create_label(text, 10, 'white'))
             label = getattr(self, f'{n_row}_start_label')
-
             label.place(x=self._padx + 66, y=19 + n_row * spacing)
 
             # END
@@ -549,7 +521,6 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n_row}_end_label', self.create_label(text, 10, 'green'))
             label = getattr(self, f'{n_row}_end_label')
-
             label.place(x=self._padx + 114, y=19 + n_row * spacing)
 
             # CLEAR
@@ -559,7 +530,6 @@ class ChronoOverlay(tk.Tk):
 
             setattr(self, f'{n_row}_clear_label', self.create_label(text, 10, 'yellow'))
             label = getattr(self, f'{n_row}_clear_label')
-
             label.place(x=self._padx + 162, y=19 + n_row * spacing)
 
             n_row += 1
@@ -570,6 +540,7 @@ if __name__ == '__main__':
     class Game():
         def __init__(self):
             self.mockup = True
+            self.reset = False
 
         def reset_jungle(self):
             return

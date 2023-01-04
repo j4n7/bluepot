@@ -6,3 +6,4 @@ infi.systray
 pymem
 pyinstaller
 keyboard
+wmi

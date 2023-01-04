@@ -97,8 +97,8 @@ class Spell:
 
     @property
     def is_ready(self):
-        is_ready = self.pm.read_int(self.address + Spell.is_ready_offset)
-        return is_ready
+        is_ready = self.pm.read_short(self.address + Spell.is_ready_offset)
+        return True if is_ready == 0 else False
 
     @property
     def name(self):

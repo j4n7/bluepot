@@ -1,7 +1,9 @@
 import sys
+import wmi
 import json
-import requests
 import urllib3
+import requests
+import pythoncom
 
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -40,6 +42,25 @@ def offsets_need_update(remote, local):
     if remote[0] > local[0] or remote[1] > local[1]:
         return True
     return False
+
+
+def get_game_info():
+    pythoncom.CoInitialize()  # Run in thread
+
+    c = wmi.WMI()
+
+    for process in c.Win32_Process(name='League of Legends.exe'):
+        command_line = process.CommandLine.replace('"', '')
+
+    arguments = ['-' + str_ for n, str_ in enumerate(command_line.split(' -')) if n != 0]
+
+    for argument in arguments:
+        if argument.startswith('-GameID='):
+            game_id = argument.replace('-GameID=', '')
+        elif argument.startswith('-Region='):
+            region = argument.replace('-Region=', '')
+
+    return game_id, region
 
 
 def get_game_stats():
