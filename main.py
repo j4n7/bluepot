@@ -1,15 +1,17 @@
+import json
 import warnings
+import requests
+import keyboard
+
 from pathlib import Path
 from threading import Thread
 from pymem import Pymem
 from bs4 import MarkupResemblesLocatorWarning
 
-import json
-import keyboard
-
 from src.models.game import Game
 from src.functions import get_base_dir, is_game_live
 from src.trayicon import TrayIcon
+from src.newreleasewindow import NewReleaseWindow
 from src.chronooverlay import ChronoOverlay
 # from src.minimapoverlay import MinimapOverlay
 
@@ -22,7 +24,11 @@ data_dir = base_dir / 'data'
 
 
 class BluePot():
+    version = '1.2.0'
+
     def __init__(self, use_chrono_overlay=False, use_chrono_overlay_hotkeys=False):
+        self._check_new_release()
+
         self._use_chrono_overlay = True if use_chrono_overlay else False
         self._use_hotkeys = True if use_chrono_overlay_hotkeys else False
 
@@ -39,6 +45,23 @@ class BluePot():
             self.hotkey_stop = 69  # Pause key <event.scan_code>
             self.hotkey_reset = 14  # Backspace key
             self._game_hotkeys_settings_init()
+
+    def _check_new_release(self):
+        request = requests.get('https://api.github.com/repos/j4n7/bluepot/releases/latest')
+        version_remote = [int(n) for n in request.json()['name'][1:].split('.')]
+        version_local = [int(n) for n in BluePot.version.split('.')]
+
+        new_release_available = False
+        if version_remote[0] > version_local[0]:
+            new_release_available = True
+        elif version_remote[1] > version_local[1]:
+            new_release_available = True
+        elif version_remote[2] > version_local[2]:
+            new_release_available = True
+
+        if new_release_available:
+            new_release_window = NewReleaseWindow()
+            new_release_window.mainloop()
 
     def _game_tray_icon_init(self):
         TrayIcon()
