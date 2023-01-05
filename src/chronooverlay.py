@@ -4,6 +4,7 @@ import tkinter as tk
 import sys
 import csv
 import datetime
+import requests
 
 import win32gui
 # import win32con
@@ -87,7 +88,7 @@ class ChronoOverlay(tk.Tk):
         self.set_headers()
         self.set_labels()
 
-        self.get_clears_optimized()
+        self.get_clears_optimized(check_updates=True)
         self.chrono_exporter = ChronoExporter(self.game)
 
     def terminate(self):
@@ -244,8 +245,25 @@ class ChronoOverlay(tk.Tk):
         self.header_total_label = self.create_label(self.header_total_text, 10, 'yellow')
         self.header_total_label.place(x=self._padx + 162, y=19 + 21)
 
-    def get_clears_optimized(self):
+    def get_clears_optimized(self, check_updates=False):
         csv_path = base_dir / 'data' / 'clears_optimized.csv'
+
+        if check_updates:
+            with requests.Session() as session:
+                request = session.get('https://raw.githubusercontent.com/j4n7/bluepot/develop/data/clears_optimized.csv')
+                decoded_content = request.content.decode('utf-8')
+                reader = csv.reader(decoded_content.splitlines())
+                remote = [row for row in reader]
+                version_remote = int(remote[0][0].split(' ')[0])
+
+            with open(csv_path) as csv_file:
+                reader = csv.reader(csv_file)
+                version_local = int(next(reader)[0].split(' ')[0])
+
+            if version_remote > version_local:
+                with open(csv_path, 'w', newline='', encoding='utf-8') as csv_file:
+                    writer = csv.writer(csv_file)
+                    writer.writerows(remote)
 
         with open(csv_path) as csv_file:
             dict_reader = csv.DictReader(csv_file)
