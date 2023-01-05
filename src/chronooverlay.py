@@ -1,9 +1,8 @@
 import tkinter as tk
-from tkinter.filedialog import asksaveasfile
 # from PIL import Image, ImageTk
 
 import sys
-import json
+import csv
 import datetime
 
 import win32gui
@@ -16,11 +15,11 @@ from pymem.exception import ProcessError
 
 # FIX RELATIVE IMPORTS
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    from src.functions import format_time
+    from src.functions import get_base_dir, parse_time, format_time
     from src.chronoexporter import ChronoExporter
 else:
     sys.path.append('./src')
-    from functions import format_time
+    from functions import get_base_dir, parse_time, format_time
     from chronoexporter import ChronoExporter
 
 
@@ -29,7 +28,8 @@ else:
 # https://stackoverflow.com/questions/29641616/drag-window-when-using-overrideredirect
 
 
-path_img = PurePath(PurePath(__file__).parent, 'img')
+base_dir = get_base_dir()
+path_img = PurePath(base_dir, 'src', 'img')
 
 
 class CustomFrame(tk.Frame):
@@ -87,6 +87,7 @@ class ChronoOverlay(tk.Tk):
         self.set_headers()
         self.set_labels()
 
+        self.get_clears_optimized()
         self.chrono_exporter = ChronoExporter(self.game)
 
     def terminate(self):
@@ -243,6 +244,15 @@ class ChronoOverlay(tk.Tk):
         self.header_total_label = self.create_label(self.header_total_text, 10, 'yellow')
         self.header_total_label.place(x=self._padx + 162, y=19 + 21)
 
+    def get_clears_optimized(self):
+        csv_path = base_dir / 'data' / 'clears_optimized.csv'
+
+        with open(csv_path) as csv_file:
+            dict_reader = csv.DictReader(csv_file)
+            clears_optimized = list(dict_reader)
+
+        self.clears_optimized = [clear for clear in clears_optimized if clear['Champ'] == self.game.champion_local.name]
+
     def get_jungle_chrono(self):
 
         def get_name_and_color(step_name):
@@ -259,6 +269,7 @@ class ChronoOverlay(tk.Tk):
         jungle_chrono = {}
         n_step = 0
         n_camps = 0
+        n_camp = 0
         end_current = datetime.timedelta(seconds=0)
         for step_name, step_info in self.game._jungle_path.items():
             if self.game.path_start and n_step <= 10 and n_camps <= 5:  # * Max overlay space
@@ -271,11 +282,52 @@ class ChronoOverlay(tk.Tk):
                 total = step_info['total'] if step_info['end'] else clear_current - step_info['start']
 
                 name, color = get_name_and_color(step_name)
-                jungle_chrono[step_name] = {'name': name, 'color': color, 'is_smited': step_info['is_smited'], 'start': start, 'end': end, 'total': total}
 
                 n_camps = n_camps + 1 if not step_name.startswith('moving') and step_info['end'] else n_camps
-
                 n_step += 1
+
+                jungle_chrono[step_name] = {'name': name, 'color': color, 'is_smited': step_info['is_smited'],
+                                            'start': start, 'end': end, 'total': total,
+                                            'start_optimized': None, 'end_optimized': None, 'total_optimized': None}
+
+                clears_optimized_coincidences = []
+                if not step_name.startswith('moving'):
+                    n_camp += 1
+                    for clear in self.clears_optimized:
+                        if clear[f'C{n_camp} Name'] == name and clear[f'C{n_camp} Color'] == color.capitalize():
+                            clears_optimized_coincidences.append(clear)
+
+                            start_optimized = parse_time(clear[f'C{n_camp} Start'])
+                            end_optimized = parse_time(clear[f'C{n_camp} End'])
+                            total_optimized = parse_time(clear[f'C{n_camp} Total'])
+
+                            if step_info['start']:
+                                if start - start_optimized > datetime.timedelta(seconds=2):
+                                    jungle_chrono[step_name]['start_optimized'] = 'red'
+                                elif start - start_optimized <= datetime.timedelta(seconds=2) and start - start_optimized > datetime.timedelta(seconds=0):
+                                    jungle_chrono[step_name]['start_optimized'] = 'yellow'
+                                else:
+                                    jungle_chrono[step_name]['start_optimized'] = 'green'
+
+                            if step_info['end']:
+                                if end - end_optimized > datetime.timedelta(seconds=2):
+                                    jungle_chrono[step_name]['end_optimized'] = 'red'
+                                elif end - end_optimized <= datetime.timedelta(seconds=2) and end - end_optimized > datetime.timedelta(seconds=0):
+                                    jungle_chrono[step_name]['end_optimized'] = 'yellow'
+                                else:
+                                    jungle_chrono[step_name]['end_optimized'] = 'green'
+
+                                if total - total_optimized > datetime.timedelta(seconds=2):
+                                    jungle_chrono[step_name]['total_optimized'] = 'red'
+                                elif total - total_optimized <= datetime.timedelta(seconds=2) and total - total_optimized > datetime.timedelta(seconds=0):
+                                    jungle_chrono[step_name]['total_optimized'] = 'yellow'
+                                else:
+                                    jungle_chrono[step_name]['total_optimized'] = 'green'
+                            else:
+                                jungle_chrono[step_name]['end_optimized'] = '#B372E8'
+                                jungle_chrono[step_name]['end'] = total_optimized
+
+                    self.clears_optimized = clears_optimized_coincidences if clears_optimized_coincidences else self.clears_optimized
 
         if jungle_chrono:
             jungle_chrono['total'] = {'name': 'TOTAL',
@@ -283,7 +335,8 @@ class ChronoOverlay(tk.Tk):
                                       'is_smited': None,
                                       'start': f'{n_camps}camps',
                                       'end': end_current if end_current else '',
-                                      'total': end_current - self.game.offset_start if end_current else ''}
+                                      'total': end_current - self.game.offset_start if end_current else '',
+                                      'start_optimized': None, 'end_optimized': None, 'total_optimized': None}
 
         return jungle_chrono
 
@@ -369,13 +422,20 @@ class ChronoOverlay(tk.Tk):
             '''Game finished'''
             self.destroy()
 
-        # DELETE UNDERLINES
+        # RESET
         if self.game.reset:
             for n in range(2, 14):
                 button = getattr(self, f'{n}_name_button')
                 button.config(font=('Tahoma', 10,))
-            self.chrono_exporter.saves_n = 0
+                label = getattr(self, f'{n}_start_label')
+                label.config(fg='white')
+                label = getattr(self, f'{n}_end_label')
+                label.config(fg='green')
+                label = getattr(self, f'{n}_clear_label')
+                label.config(fg='yellow')
             self.game.reset = False
+            self.chrono_exporter.saves_n = 0
+            self.get_clears_optimized()
 
         # FIRST ERASE CURRENT TEXT
         for n in range(2, 14):
@@ -441,21 +501,39 @@ class ChronoOverlay(tk.Tk):
 
                         # START
                         label = getattr(self, f'{n}_start_label')
-                        label.config(fg='white')
+                        if not step_info['start_optimized']:
+                            label.config(fg='white')
+                        else:
+                            color = step_info['start_optimized'] if step_info['start_optimized'] != 'red' else '#E87272'
+                            label.config(fg=color)
 
                         text = getattr(self, f'{n}_start_text')
                         text.set(step_info['start'])
 
                         # END
                         label = getattr(self, f'{n}_end_label')
-                        label.config(fg='green')
+                        if not step_info['end_optimized']:
+                            if self.clears_optimized:
+                                label.config(fg='white')
+                            else:
+                                label.config(fg='green')
+                        else:
+                            color = step_info['end_optimized'] if step_info['end_optimized'] != 'red' else '#E87272'
+                            label.config(fg=color)
 
                         text = getattr(self, f'{n}_end_text')
                         text.set(step_info['end'])
 
                         # CLEAR
                         label = getattr(self, f'{n}_clear_label')
-                        label.config(fg='yellow')
+                        if not step_info['total_optimized']:
+                            if self.clears_optimized:
+                                label.config(fg='white')
+                            else:
+                                label.config(fg='yellow')
+                        else:
+                            color = step_info['total_optimized'] if step_info['total_optimized'] != 'red' else '#E87272'
+                            label.config(fg=color)
 
                         text = getattr(self, f'{n}_clear_text')
                         text.set(step_info['total'])
@@ -541,6 +619,9 @@ if __name__ == '__main__':
         def __init__(self):
             self.mockup = True
             self.reset = False
+
+            self.champion_local = lambda: None
+            self.champion_local.name = ''
 
         def reset_jungle(self):
             return

@@ -120,8 +120,9 @@ def is_game_live():
 
 
 def parse_time(time):
-    time = datetime.strptime(time, '%M:%S')
-    delta = timedelta(minutes=time.minute, seconds=time.second)
+    format = '%M:%S.%f' if time[-3] == '.' else '%M:%S'
+    time = datetime.strptime(time, format)
+    delta = timedelta(minutes=time.minute, seconds=time.second, microseconds=time.microsecond)
     return delta
 
 
