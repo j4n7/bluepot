@@ -1,19 +1,20 @@
 {
     "version": "12.23",
     "patch": {
-        "value": "0x315A3B0",
+        "value": "0x3174E70",
         "type": "Str",
-        "is_used": false
+        "coments": "<League of Legends.exe> + 0x3174E70"
     },
     "game_time": {
-        "value": "0x3143C44",
-        "type": "Float"
+        "value": "0x315CCF4",
+        "type": "Float",
+        "coments": "<League of Legends.exe> + 0x315CCF4"
     },
     "cursor": [
         {
-            "value": "0x24FB364",
+            "value": "0x2514404",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x24FB364]"
+            "comments": "[<League of Legends.exe> + 0x2514404]"
         },
         {
             "entity_hovered": {
@@ -34,9 +35,9 @@
     ],
     "chat": [
         {
-            "value": "0x314B094",
+            "value": "0x3163F94",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x314B094]"
+            "comments": "[<League of Legends.exe> + 0x3163F94]"
         },
         {
             "times_open": {
@@ -73,9 +74,9 @@
     ],
     "minimap": [
         {
-            "value": "0x3143C88",
+            "value": "0x315CD38",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x3143C88]"
+            "comments": "[<League of Legends.exe> + 0x315CD38]"
         },
         {
             "pos": {
@@ -128,28 +129,28 @@
     ],
     "unit": {
         "manager": {
-            "value": "0x24FB1E4",
+            "value": "0x2514284",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x24FB1E4]"
+            "comments": "[<League of Legends.exe> + 0x2514284]"
         }
     },
     "tower": {
         "manager": {
-            "value": "0x3142824",
+            "value": "0x315BA04",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x3142824]"
+            "comments": "[<League of Legends.exe> + 0x315BA04]"
         }
     },
     "champion": {
         "manager": {
-            "value": "0x18ADB74",
+            "value": "0x18C6BBC",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x18ADB74]"
+            "comments": "[<League of Legends.exe> + 0x18C6BBC]"
         },
         "local": {
-            "value": "0x314A404",
+            "value": "0x3163080",
             "type": "Object",
-            "comments": "[<League of Legends.exe> + 0x314A404]"
+            "comments": "[<League of Legends.exe> + 0x3163080]"
         },
         "summoner_name": {
             "value": "0x54",
@@ -166,20 +167,20 @@
             "comments": "6 = normal; 11 = herald/baron"
         },
         "gold": {
-            "value": "0x1BB0",
+            "value": "0x1BBC",
             "type": "Float"
         },
         "gold_max": {
-            "value": "0x1BC0",
+            "value": "0x1BCC",
             "type": "Float"
         }
     },
     "entity": {
         "manager": [
             {
-                "value": "0x18ADAD8",
+                "value": "0x18C6B1C",
                 "type": "Object",
-                "comments": "[<League of Legends.exe> + 0x18ADAD8]"
+                "comments": "[<League of Legends.exe> + 0x18C6B1C]"
             },
             {
                 "list": {
@@ -200,7 +201,7 @@
         "buff": {
             "manager": [
                 {
-                    "value": "0x2338",
+                    "value": "0x2340",
                     "type": "Object"
                 },
                 {
@@ -232,7 +233,7 @@
         "spell": {
             "book": [
                 {
-                    "value": "0x2500",
+                    "value": "0x2508",
                     "type": "Object"
                 },
                 {
@@ -275,10 +276,15 @@
                                 "type": "Float",
                                 "comments": "Probably only makes sense in the case of Smite"
                             },
-                            "is_ready": {
+                            "is_used": {
                                 "value": "0xEC",
                                 "type": "Int16",
-                                "comments": "0 = ready; 256 = cooldown, Smite can be in cooldown with 1 charge"
+                                "comments": "0 = not used; 256 = used; only works in some cases"
+                            },
+                            "casted_game_time": {
+                                "value": "0x108",
+                                "type": "Float",
+                                "comments": "Only works in some cases"
                             },
                             "data": [
                                 {
@@ -301,13 +307,10 @@
                                             "type": "Ptr"
                                         },
                                         {
-                                            "name_1": {
+                                            "name": {
                                                 "value": "0x6C",
-                                                "type": "Text8Ptr"
-                                            },
-                                            "name_2": {
-                                                "value": "0x90",
-                                                "type": "Text8Ptr"
+                                                "type": "Text8Ptr",
+                                                "alt": "0x90"
                                             }
                                         }
                                     ]
@@ -451,16 +454,16 @@
             "type": "Float"
         },
         "name": {
-            "value": "0x2DB4",
+            "value": "0x2DBC",
             "type": "Text8Ptr",
-            "alt": "0x3190"
+            "alt": "0x3198"
         },
         "aa_index_target": {
             "value": "0x2FC4",
             "type": "Int16"
         },
         "level": {
-            "value": "0x35A4",
+            "value": "0x35AC",
             "type": "Int32"
         },
         "attack_spped_bonus": {
@@ -476,8 +479,9 @@
     },
     "missile": {
         "manager": {
-            "value": "0x314B03C",
-            "type": "Object"
+            "value": "0x3163F08",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x3163F08]"
         },
         "data": [
             {

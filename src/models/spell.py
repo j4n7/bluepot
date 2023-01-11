@@ -15,11 +15,11 @@ class Spell:
     charges_n_offset = offsets.entity_spell_book_slots_charges_n
 
     damage_offset = offsets.entity_spell_book_slots_damage
-    is_ready_offset = offsets.entity_spell_book_slots_is_ready
+    is_used_offset = offsets.entity_spell_book_slots_is_used
 
     data_offset = offsets.entity_spell_book_slots_data
     data_data_offset = offsets.entity_spell_book_slots_data_data
-    data_data_name_offset = offsets.entity_spell_book_slots_data_data_name_1
+    data_data_name_offset = offsets.entity_spell_book_slots_data_data_name
 
     def __init__(self, pm, address, key):
         self.pm = pm
@@ -96,9 +96,9 @@ class Spell:
         return damage
 
     @property
-    def is_ready(self):
-        is_ready = self.pm.read_short(self.address + Spell.is_ready_offset)
-        return True if is_ready == 0 else False
+    def is_used(self):
+        is_used = self.pm.read_short(self.address + Spell.is_used_offset)
+        return True if is_used == 0 else False
 
     @property
     def name(self):

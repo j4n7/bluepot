@@ -159,15 +159,14 @@ entity_spell_book_slots_charge_cooldown_max_time = get_offset(offsets['entity'][
 entity_spell_book_slots_charges_n = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['charges_n'])
 
 entity_spell_book_slots_damage = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['damage'])
-entity_spell_book_slots_is_ready = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['is_ready'])
+entity_spell_book_slots_is_used = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['is_used'])
 
 entity_spell_book_slots_data = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][0])
 # entity_spell_book_slots_data_name = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['name'])
 # entity_spell_book_slots_data_name_len = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['name_len'])
 
 entity_spell_book_slots_data_data = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['data'][0])
-entity_spell_book_slots_data_data_name_1 = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['data'][1]['name_1'])
-entity_spell_book_slots_data_data_name_2 = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['data'][1]['name_2'])
+entity_spell_book_slots_data_data_name = get_offset(offsets['entity']['spell']['book'][1]['slots'][1]['data'][1]['data'][1]['name'])
 
 # ............................................................................
 
