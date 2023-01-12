@@ -1,6 +1,9 @@
+
 # BluePot
 
-**_Updated to LOL patch 12.23_**
+
+![LOL Patch](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fj4n7%2Fbluepot%2Fdevelop%2Fdata%2Fbadge.json)
+
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/j4n7/bluepot/master/src/img/potion.png?raw=true" alt="LOLFF15 Logo" width="32" height="32">
@@ -37,7 +40,7 @@ Currently BluePot is released as a **Windows Exectuable** that implements an ove
 
 BluePot Windows Exectuable provides an **overlay that features a jungle path chronometer**.
 
-You may check it out in this **[YouTube video](https://www.youtube.com/watch?v=Lm62jbqlmLQ)**.
+You may check it out in this **[YouTube video](https://www.youtube.com/watch?v=eNIXUO_p6cw)**.
 
 You can get the last release from **[here](https://github.com/j4n7/bluepot/releases)** (EXE version).
 
@@ -49,13 +52,19 @@ You can get the last release from **[here](https://github.com/j4n7/bluepot/relea
 <img src="https://i.ibb.co/ZzrSs36/Blue-Pot-Tray-Icon.png" alt="Blue-Pot-Tray-Icon" border="0">
 </p>
 
-This allows measuring the time it takes to clear each camp individually and also the time it takes moving between them. Thus, this information can help you improving your jungle pathing by knowing in what stages you could perform better.
 
-It automatically detects when you start and finish your jungle path and is very easy to reset a certain stage or stages so you can train that specific part to get your desire time.
 
-This saves you the tedious task of having to fully start from the beginning.
+## Why use the Jungle Path Chronometer?
 
-You can easily save this information for tracking your own progress but also for sharing it with other players.
+- Compare your clears in real time with the ones made by pro-players and see where you are not being efficient. New champions and clear times will be added in the future.
+
+- Measure the time it takes to clear each camp individually and also the time it takes moving between them. This information can help you improve your jungle pathing by knowing in what stages you could perform better.
+
+- You can manually spawn jungle monsters inside the Practice Tool before their default spawning time and the Jungle Path Chronometer will adjust the time for you. This way you won't need to wait any time before you can start practicing your desired jungle clear.
+
+- Everytime you restart the game, the Jungle Path Chronometer will automatically reset and it will track time relatively to the new clear. By default, the Practice Tool doesn't reset the game clock so it can be hard to calculate your times. This tool solves this problem.
+
+- You can easily save this information for tracking your own progress but also for sharing it with other players.
 
 ***Take into account that it only registers 6 camps at maximum and crabs, drakes, herald and baron are excluded.***
 
@@ -75,51 +84,8 @@ The moment you start attacking or interacting with a jungle monster the chronome
 
 You can reset it at any moment by clicking the button **Reset** at the right top corner.
 
-You can also export your current times by clicking the buttton **Export** at the top. It will pop up a save dialog where you can choose the name and location of the **.txt file**. This file will could be furtherly edited to store some more useful information such as Smite locations or other comments. Here is an example of such file:
+You can also export your current times by clicking the buttton **Export** at the top. This will create a file called **Clears.csv** or append new rows to it. This way you can track your current times for each camp. and compare between clears. Before saving you can **click the names** of the camps to mark the ones you have smited.
 
-```
------------------------------
-Created by BluePot
-Player name: <fill>
------------------------------
-LOL version: 12.23
-Champion name: Nocturne
------------------------------
-Starting side: <fill>
-Number of camps: 6
------------------------------
-
-
----------------------------------------------------------
-CAMPS     COLOR     START     END       TOTAL     SMITE  
----------------------------------------------------------
-Blue      Blue      0:00.00   0:25.61   0:25.61
----------------------------------------------------------
-M1                  0:25.61   0:28.24   0:02.63
----------------------------------------------------------
-Gromp     Blue      0:28.24   0:46.72   0:18.48
----------------------------------------------------------
-M2                  0:46.72   0:53.07   0:06.35
----------------------------------------------------------
-Wolves    Blue      0:53.07   1:06.72   0:13.65
----------------------------------------------------------
-M3                  1:06.72   1:18.94   0:12.22
----------------------------------------------------------
-Raptors   Blue      1:18.94   1:31.16   0:12.22
----------------------------------------------------------
-M4                  1:31.16   1:34.87   0:03.71
----------------------------------------------------------
-Red       Blue      1:34.87   1:53.67   0:18.80
----------------------------------------------------------
-M5                  1:53.67   1:58.60   0:04.93
----------------------------------------------------------
-Krugs     Blue      1:58.60   2:08.22   0:09.62   Yes
----------------------------------------------------------
-TOTAL                         2:08.22   3:38.22*
----------------------------------------------------------
-
-* Starting at 1:30
-```
 
 
 ## Hotkeys for the Jungle Path Chronometer
@@ -131,7 +97,8 @@ TOTAL                         2:08.22   3:38.22*
 BluePot comes along with a **hotkeys_settings.txt file**. You can modify its contents (e.g. Windows Notepad) to assign different hotkeys for these functions. This file has to be in the same directory as the Executable file, otherwise changes won't apply.
 
 
-## Advantages of the Jungle Path Chronometer
+
+## Other advantages of the Jungle Path Chronometer
 
 - No bloatware
 
@@ -141,7 +108,7 @@ BluePot comes along with a **hotkeys_settings.txt file**. You can modify its con
 
 - Open source
 
-- Minimal weight (17 MB)
+- Minimal weight (~20 MB)
 
 - Self-executable (no need to install it)
 
@@ -178,3 +145,8 @@ Also, if you are a Riot employee and you took the effort to read all of this and
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+
+
+---
+BluePot isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc.
