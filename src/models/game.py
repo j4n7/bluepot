@@ -1,83 +1,131 @@
 import json
-from functools import cached_property
+from threading import Thread
 from datetime import timedelta
-from pathlib import Path
 from pymem.exception import MemoryReadError
 
+from .cursor import Cursor
 from .chat import Chat
 from .entity import Entity
+from .manager import Manager
 from .entitymanager import EntityManager
-from .objectmanager import ObjectManager
 
-from src.functions import get_base_dir, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
+from src.functions import get_base_dir, get_game_info, get_game_stats, get_game_events, get_death_time, get_drake_death_count, parse_time
 import data.offsets as offsets
 
 
 class Game:
+    version = offsets.version
+    patch_offset = offsets.patch
     game_time_offset = offsets.game_time
 
-    minimap_hud_offset = offsets.minimap_hud
-    minimap_hud_layer_offset = offsets.minimap_hud_layer
-    minimap_hud_size_a_offset = offsets.minimap_hud_size_a
-    minimap_hud_size_b_offset = offsets.minimap_hud_size_b
+    minimap_offset = offsets.minimap
+    minimap_data_offset = offsets.minimap_data
+    minimap_data_size_a_offset = offsets.minimap_data_size_a
+    minimap_data_size_b_offset = offsets.minimap_data_size_b
 
-    local_player_offset = offsets.local_player
-    minion_manager_offset = offsets.minion_manager
-    champion_manager_offset = offsets.champion_manager
+    unit_manager_offset = offsets.unit_manager
     tower_manager_offsset = offsets.tower_manager
+    missile_manager_offsset = offsets.missile_manager
+    champion_manager_offset = offsets.champion_manager
+
+    champion_local_offset = offsets.champion_local
 
     server_tick_time = 0.033  # https://leagueoflegends.fandom.com/wiki/Tick_and_updates
 
     def __init__(self, pm):
         self.pm = pm
+
+        self.id, self.region = get_game_info()
+
+        self.version = Game.version
+
         self.chat = Chat(pm)
+        self.cursor = Cursor(pm)
 
-        self.patch_version = offsets.patch_version
+        self.champion_local = Entity(pm, pm.read_int(pm.base_address + Game.champion_local_offset))
 
-        self.local_player = Entity(pm, pm.read_int(pm.base_address + Game.local_player_offset))
+        self.unit_manager = Manager(pm, Game.unit_manager_offset)
+        self.champion_manager = Manager(pm, Game.champion_manager_offset)
+        self.tower_manager = Manager(pm, Game.tower_manager_offsset)
+        self.missile_manager = Manager(pm, Game.missile_manager_offsset)
 
-        self.minion_manager = EntityManager(pm, Game.minion_manager_offset)
-        self.champion_manager = EntityManager(pm, Game.champion_manager_offset)
-        self.tower_manager = EntityManager(pm, Game.tower_manager_offsset)
+        self.entity_manager = EntityManager(pm)
 
-        self.object_manager = ObjectManager(pm)
+        self.champion_local.set_spells(lambda: self.time)
 
+        self._init_game()
+        self._init_jungle_path()
+        self._init_jungle_smite()
         self._init_jungle_monsters()
         self._init_jungle_camps()
 
-        self._jungle_path = {}
-        self._jungle_camps_stopped = []
+        self._update()
 
     @property
     def events(self):
         return get_game_events()
 
     @property
-    def time(self):
+    def patch(self):
+        patch = self.pm.read_string(self.pm.base_address + Game.patch_offset)
+        return patch
+
+    @property
+    def time_real(self):
         seconds = self.pm.read_float(self.pm.base_address + Game.game_time_offset)
         return timedelta(seconds=seconds)
 
     @property
-    def minimap_resolution(self):
-        minimap_hud_address = self.pm.read_int(self.pm.base_address + Game.minimap_hud_offset)
-        pointer = minimap_hud_address + Game.minimap_hud_layer_offset
-        minimap_hud_layer_address = self.pm.read_int(pointer)
-        minimap_hud_size_a = self.pm.read_float(minimap_hud_layer_address + Game.minimap_hud_size_a_offset)
-        minimap_hud_size_b = self.pm.read_float(minimap_hud_layer_address + Game.minimap_hud_size_b_offset)
-
-        return {'width': minimap_hud_size_a, 'height': minimap_hud_size_b}
+    def time(self):
+        '''Seconds from latest restart'''
+        return self.time_real - self.time_start
 
     @property
-    def jungle_monsters(self):
-        for minion in self.minion_manager.entities:
-            if minion.category == 'jungle_monster':
-                yield minion
+    def time_jungle_path(self):
+        if self._jungle_path_offset_time:
+            return self.time + self._jungle_path_offset_time
+        return self.time
+
+    @property
+    def minimap_resolution(self):
+        minimap_address = self.pm.read_int(self.pm.base_address + Game.minimap_offset)
+        pointer = minimap_address + Game.minimap_data_offset
+        minimap_data_address = self.pm.read_int(pointer)
+        minimap_data_size_a = self.pm.read_float(minimap_data_address + Game.minimap_data_size_a_offset)
+        minimap_data_size_b = self.pm.read_float(minimap_data_address + Game.minimap_data_size_b_offset)
+
+        return {'width': minimap_data_size_a, 'height': minimap_data_size_b}
+
+    @property
+    def jungle_monsters_memory(self):
+        for unit in self.unit_manager.entities:
+            if unit.category == 'jungle_monster':
+                yield unit
 
     @property
     def jungle_camp_respawns(self):
-        for minion in self.minion_manager.entities:
-            if minion.category == 'jungle_camp_resapwn':
-                yield minion
+        for unit in self.unit_manager.entities:
+            if unit.category == 'jungle_camp_resapwn':
+                yield unit
+
+    def _init_game(self):
+        self.time_start = timedelta(seconds=0)
+        self.restarts = 0
+        self.reset = False
+
+    def _init_jungle_path(self):
+        self._jungle_path_offset_time = None
+        self._jungle_path = {}
+        self._jungle_camps_stopped = []
+
+    def _init_jungle_smite(self):
+        self._smite_cooldown_game_time = None
+        if hasattr(self.champion_local.spells.summoner, 'Smite'):
+            self._smite_cooldown_game_time = self.champion_local.spells.summoner.Smite.cooldown_game_time
+        self._smite_time_first_casted = None
+        self._smite_charges_n = 1  # Smite always starts with 1 charge
+        self._smite_invalid = False
+        self._last_hovered_monster_name = None
 
     def _init_jungle_monsters(self):
         '''
@@ -95,18 +143,20 @@ class Game:
 
         for monster_name, monster_info in self.jungle_monsters_stored.items():
             monster_info['is_dead'] = True
+            monster_info['is_smited'] = None
             monster_info['attack_time'] = None
             monster_info['death_time'] = None
             monster_info['death_visible'] = None
 
-        for jungle_monster in self.jungle_monsters:
+        for jungle_monster in self.jungle_monsters_memory:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
                     jungle_monster_stored['is_dead'] = False
+                    jungle_monster_stored['is_smited'] = None
                     jungle_monster_stored['attack_time'] = None
                     jungle_monster_stored['death_time'] = None
-                    jungle_monster_stored['death_visible'] = None
+                    jungle_monster_stored['death_visible'] = None                    
             # ? Not sure if I need <UnicodeDecodeError> here
             except MemoryReadError or UnicodeDecodeError:
                 pass
@@ -124,6 +174,7 @@ class Game:
 
         for camp_name, camp_info in self.jungle_camps_stored.items():
             camp_info['is_dead'] = True
+            camp_info['is_smited'] = None
             camp_info['attack_time'] = None
             camp_info['death_time'] = None
             camp_info['death_visible'] = None
@@ -134,12 +185,66 @@ class Game:
             camp_info['respawn_time'] = parse_time(camp_info['respawn_time'])
             camp_info['timer_time'] = parse_time(camp_info['timer_time'])
 
+    def _update_game(self):
+        restarts = -1
+        for message in self.chat.messages_sent:
+            if '/help' in message:
+                restarts += 1
+        if restarts > self.restarts:
+            # print('Game started', self.time_start, 'Time', self.time, 'Restarts', restarts)
+            self.time_start = self.time_real
+            self.reset = True
+            self.reset_jungle()
+        self.restarts = restarts
+
+    def _update_jungle_smite(self):
+        if hasattr(self.champion_local.spells.summoner, 'Smite'):
+            # * Smite's cooldown_game_time starts around ~ 15 s (15.029, 15.033, ...) because it's on a 15 s cooldown.
+            # * Smite's cooldown_game_time updates to ~ 87 s (87.251) around 1:27
+            # * Smite's cooldown_game_time updates to ~ 90 s (90.056) around 1:30
+            # * Smite can't be casted before 1:30 under normal situations (no monsters, cannons or champs available).
+            # * Therefore, until 1:27 (~ 87.251 s), smite charges are not updated properly.
+
+            # ! Might be useless if quickly changing hovered monster before casting Smite
+            self._last_hovered_monster_name = self.cursor.entity_hovered.name if self.cursor.entity_hovered.name in self.jungle_monsters_stored else self._last_hovered_monster_name
+
+            if self.time > timedelta(seconds=87):
+                if self.champion_local.spells.summoner.Smite.charges_n != self._smite_charges_n:
+                    if self.champion_local.spells.summoner.Smite.charges_n > self._smite_charges_n:
+                        print('Smite increased:', 'Before', self._smite_charges_n, 'Now', self.champion_local.spells.summoner.Smite.charges_n)
+                    elif self.champion_local.spells.summoner.Smite.charges_n < self._smite_charges_n:
+                        if self._smite_time_first_casted and self.time - self._smite_time_first_casted < cooldown_game_time(seconds=90):
+                            # SMITE INVALID
+                            print('INVALID SMITE')
+                            self._smite_invalid = True
+                        else:
+                            monster_name = self._last_hovered_monster_name
+                            if monster_name:
+                                print('Smite casted:', monster_name, 'Before', self._smite_charges_n, 'Now', self.champion_local.spells.summoner.Smite.charges_n)
+                                self._smite_time_first_casted = self.time if not self._smite_time_first_casted else self._smite_time_first_casted
+                                self.jungle_monsters_stored[monster_name]['is_smited'] = True
+                    self._smite_charges_n = self.champion_local.spells.summoner.Smite.charges_n
+            else:
+                cooldown_game_time = self.champion_local.spells.summoner.Smite.cooldown_game_time
+                if cooldown_game_time != self._smite_cooldown_game_time:
+                    if self._smite_time_first_casted and self.time - self._smite_time_first_casted < timedelta(seconds=90):
+                        # SMITE INVALID
+                        print('INVALID SMITE (< 1:30)')
+                        self._smite_invalid = True
+                    else:
+                        monster_name = self._last_hovered_monster_name
+                        if monster_name:
+                            print('Smite casted (< 1:30):', monster_name, 'Before', self._smite_cooldown_game_time, 'Now', cooldown_game_time)
+                            self._smite_time_first_casted = self.time if not self._smite_time_first_casted else self._smite_time_first_casted
+                            self.jungle_monsters_stored[monster_name]['is_smited'] = True  
+                    self._smite_cooldown_game_time = cooldown_game_time                
+
     def _update_jungle_monsters(self):
-        for jungle_monster in self.jungle_monsters:
+        for jungle_monster in self.jungle_monsters_memory:
             try:
                 if jungle_monster.name in self.jungle_monsters_stored:
                     jungle_monster_stored = self.jungle_monsters_stored[jungle_monster.name]
-        
+
                     if jungle_monster.is_dead:
                         # MONSTER DEAD
 
@@ -166,6 +271,7 @@ class Game:
 
                         if jungle_monster_stored['is_dead']:
                             jungle_monster_stored['is_dead'] = False
+                            jungle_monster_stored['is_smited'] = None
                             jungle_monster_stored['attack_time'] = None
                             jungle_monster_stored['death_time'] = None
                             jungle_monster_stored['death_visible'] = None
@@ -176,8 +282,10 @@ class Game:
                                 self._krugs_mini[color] = {'alive': [], 'dead': []}
 
                         # MONSTER ATTACKED
-                        elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked:
-                            jungle_monster_stored['attack_time'] = self.time
+                        # ! Not working when monster is attacked out of vision
+                        elif not jungle_monster_stored['is_dead'] and not jungle_monster_stored['attack_time'] and jungle_monster.has_been_attacked(self.time):
+                            # print('MONSTER ATTACKED', jungle_monster.name, self.time)
+                            jungle_monster_stored['attack_time'] = self.time                               
 
             # ? Not sure if I need <UnicodeDecodeError> here
             except MemoryReadError or UnicodeDecodeError:
@@ -280,6 +388,13 @@ class Game:
                         camp_is_dead = False
                         camp_is_death_visible = False
 
+                # CAMP SMITED
+                if hasattr(self.champion_local.spells.summoner, 'Smite'):
+                    camp_is_smited = True if True in [self.jungle_monsters_stored[monster]['is_smited'] for monster in camp_stored_info['monsters']] else False
+                    if camp_is_smited and not camp_stored_info['is_smited']:
+                        # print('CAMP SMITED', camp_name)
+                        camp_stored_info['is_smited'] = True                         
+
                 # CAMP DEAD
                 # * Only update jungle camps where player has vision of the camp being cleared
                 if (
@@ -310,6 +425,8 @@ class Game:
                             continue
                         # print('CAMP SPAWNED', camp_name, self.time)
                         camp_stored_info['is_dead'] = False
+                        camp_stored_info['is_smited'] = None
+                        camp_stored_info['attack_time'] = None
                         camp_stored_info['death_time'] = None
                         camp_stored_info['death_visible'] = None
                         camp_stored_info['spawn_time'] = None
@@ -383,11 +500,17 @@ class Game:
             else:
                 camp_stored_info['timer'] = None
 
-    def _get_jungle_path(self):
+    def _update_jungle_path(self):
         camps_untracked = ['scuttle_top', 'scuttle_bottom', 'drake', 'herald', 'baron']
 
-        camp_times = {camp: [info['attack_time'], info['death_time']] for camp, info in self.get_jungle_camps().items() if info['attack_time'] and camp not in camps_untracked}
+        camp_times = {camp: [info['attack_time'], info['death_time']] for camp, info in self.jungle_camps_stored.items() if info['attack_time'] and camp not in camps_untracked}
         camp_times = dict(sorted(camp_times.items(), key=lambda item: item[1][0].total_seconds()))
+
+        if camp_times and not self._jungle_path_offset_time:
+            camp_name = list(camp_times.keys())[0]
+            offset_start = self.jungle_camps_stored[camp_name]['initial_time']
+            path_start_time = camp_times[camp_name][0]
+            self._jungle_path_offset_time = offset_start - path_start_time
 
         last_step_name = list(self._jungle_path)[-1] if self._jungle_path else None
 
@@ -401,7 +524,7 @@ class Game:
                     self.path_start = info[0]
 
                 # SET CAMP START TIME
-                self._jungle_path[camp] = {'name': '', 'color': '', 'start': info[0] - self.path_start + self.offset_start, 'end': None, 'total': None}
+                self._jungle_path[camp] = {'name': '', 'color': '', 'is_smited': None, 'start': info[0] - self.path_start + self.offset_start, 'end': None, 'total': None}
 
                 # SET MOVING STOP TIME
                 if last_step_name and 'moving' in last_step_name:
@@ -419,6 +542,11 @@ class Game:
                         self._jungle_path[last_step_name]['end'] = self.time - self.path_start + self.offset_start
                         self._jungle_path[camp]['total'] = self._jungle_path[camp]['end'] - self._jungle_path[camp]['start']
 
+                # CAMP SMITED
+                if self.jungle_camps_stored[camp]['is_smited']:
+                    # print('CAMP SMITED ADDED', camp, self.time)
+                    self._jungle_path[camp]['is_smited'] = True
+
         camps_cleared = True
         for step_name, step_info in self._jungle_path.items():
             if not step_info['end']:
@@ -429,86 +557,38 @@ class Game:
         if camps_cleared and n_camp_steps < 6 and last_step_name and 'moving' not in last_step_name:
             n_moving_steps = len([step_name for step_name, step_info in self._jungle_path.items() if 'moving' in step_name])
             death_times = [step_info['end'] for step_name, step_info in self._jungle_path.items()]
-            last_death_time = sorted(death_times, key=lambda time: time.total_seconds())[-1]
-            self._jungle_path[f'moving_{n_moving_steps + 1}'] = {'name': 'Moving', 'color': '', 'start': last_death_time, 'end': None, 'total': None}
+            try:
+                last_death_time = sorted(death_times, key=lambda time: time.total_seconds())[-1]
+                self._jungle_path[f'moving_{n_moving_steps + 1}'] = {'name': 'Moving', 'color': '', 'is_smited': None, 'start': last_death_time, 'end': None, 'total': None}
+            except IndexError:
+                '''Takes place when restarting game (Practice Tool)'''
 
-    def update_jungle(self):
+    def _update_jungle(self):
         '''The order of execution of these methods is non trivial.'''
+        # self._update_jungle_smite()
         self._update_jungle_monsters()
-        self._update_jungle_epic_camps()
+        # self._update_jungle_epic_camps()
         self._update_jungle_camps()  # ! S13: needs an update to correctly determine if player has vision
         # self._update_jungle_camp_respawns()  # ! S13: interferes with Krug camp timing (mini Krugs)
         # self._update_jungle_timers()  #  ! S13: not working till other methods are fixed
+        self._update_jungle_path()
 
-    def get_jungle_camps(self):
-        self.update_jungle()
-        return self.jungle_camps_stored
+    def _update(self):
+        '''Main loop'''
+        def update():
+            while True:
+                try:
+                    self._update_game()
+                    self._update_jungle()
+                except (MemoryReadError, UnicodeDecodeError):
+                    '''Ignore memory errors'''
+
+        thread = Thread(target=update, daemon=True)
+        thread.start()
 
     def reset_jungle(self):
-        self._krugs_mini = {'blue': {'alive': [], 'dead': []}, 'red': {'alive': [], 'dead': []}}
-
-        for monster_name, monster_info in self.jungle_monsters_stored.items():
-            monster_info['is_dead'] = True
-            monster_info['attack_time'] = None
-            monster_info['death_time'] = None
-            monster_info['death_visible'] = None
-
-        for camp_name, camp_info in self.jungle_camps_stored.items():
-            camp_info['is_dead'] = True
-            camp_info['attack_time'] = None
-            camp_info['death_time'] = None
-            camp_info['death_visible'] = None
-            camp_info['spawn_time'] = None
-            camp_info['timer'] = None
-
-        self._jungle_path = {}
-        self._jungle_camps_stopped = []
-
-    def get_jungle_chrono(self):
-        self._get_jungle_path()
-
-        def get_name_and_color(step_name):
-            name, color = step_name.split('_')
-            if name == 'moving':
-                name = '..........'
-                color = None
-            # if color == 'blue':
-            #     color = '#72A7E8'
-            # elif color == 'red':
-            #     color = '#E87272'
-            return name.capitalize(), color
-
-        jungle_chrono = {}
-        n_step = 0
-        n_camps = 0
-        end_current = timedelta(seconds=0)
-        for step_name, step_info in self._jungle_path.items():
-            if self.path_start and n_step <= 10 and n_camps <= 5:  # * Max overlay space
-
-                end_current = step_info['end'] if step_info['end'] and step_info['end'] > end_current and step_info['total'] else end_current
-                clear_current = self.time - self.path_start + self.offset_start
-
-                start = step_info['start'] if step_info['start'] else timedelta(seconds=0)
-                end = step_info['end'] if step_info['end'] else (clear_current if clear_current else timedelta(seconds=0))
-                total = step_info['total'] if step_info['end'] else clear_current - step_info['start']
-
-                name, color = get_name_and_color(step_name)
-                jungle_chrono[step_name] = {'name': name, 'color': color, 'start': start, 'end': end, 'total': total}
-
-                n_camps = n_camps + 1 if not step_name.startswith('moving') and step_info['end'] else n_camps
-                
-                n_step += 1
-
-        if jungle_chrono:
-            jungle_chrono['total'] = {'name': 'TOTAL',
-                                      'color': None,
-                                      'start': f'{n_camps}camps',
-                                      'end': end_current if end_current else '',
-                                      'total': end_current - self.offset_start if end_current else ''}
-
-        return jungle_chrono
-
-    def stop_jungle_chrono_time(self):
-        last_step_name = list(self._jungle_path)[-1] if self._jungle_path else None
-        if last_step_name and not last_step_name.startswith('moving'):
-            self._jungle_camps_stopped.append(last_step_name)
+        '''Can be called from outside (e.g. overlay)'''
+        # self._init_jungle_smite()
+        self._init_jungle_monsters()
+        self._init_jungle_camps()
+        self._init_jungle_path()

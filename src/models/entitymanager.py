@@ -1,20 +1,24 @@
 from pymem.exception import MemoryReadError
 
 from src.models.entity import Entity
+import data.offsets as offsets
 
 
 class EntityManager:
-    def __init__(self, pm, offset):
+    offset = offsets.entity_manager
+    list_offset = offsets.entity_manager_list
+    list_len_offset = offsets.entity_manager_list_len
+
+    def __init__(self, pm):
         self.pm = pm
-        self.offset = offset
-        self.address = pm.read_int(pm.base_address + self.offset)
+        self.address = pm.read_int(pm.base_address + EntityManager.offset)
 
     @property
     def entities(self):
-        pointer_0_address = self.address + 0x4
+        pointer_0_address = self.address + EntityManager.list_offset
         pointer_0 = self.pm.read_int(pointer_0_address)
 
-        list_len_address = self.address + 0x8
+        list_len_address = self.address + EntityManager.list_len_offset
         list_len = self.pm.read_int(list_len_address)
 
         for n in range(list_len):
@@ -24,4 +28,4 @@ class EntityManager:
                 entity = Entity(self.pm, address_n)
                 yield entity
             except MemoryReadError:
-                '''Prevents error when minions are manually generated in practice tool'''
+                '''Prevents error when units are manually generated (Practice Tool)'''

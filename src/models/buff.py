@@ -5,9 +5,8 @@ import data.offsets as offsets
 
 
 class Buff:
-    name_offset = offsets.buff_name
-    start_time_offset = offsets.buff_start_time
-    end_time_offset = offsets.buff_end_time
+    start_time_offset = offsets.entity_buff_start_time
+    end_time_offset = offsets.entity_buff_end_time
 
     def __init__(self, pm, address, name):
         self.pm = pm

@@ -4,8 +4,10 @@ from pymem.exception import MemoryReadError
 from functools import cached_property
 from pathlib import Path
 
+from src.decorators import needs_vision
 from src.functions import get_base_dir
 from src.models.buffmanager import BuffManager
+from src.models.spellmanager import SpellManager
 import data.offsets as offsets
 
 
@@ -20,15 +22,18 @@ with open(data_dir / 'jungle_camps.json') as json_file:
 
 
 class Entity:
-    name_offset = offsets.name
-    name_full_offset = offsets.name_full
-    position_offset = offsets.position
-    is_visible_offset = offsets.is_visible
-    mana_offset = offsets.mana
-    mana_max_offset = offsets.mana_max
-    health_offset = offsets.health
-    health_max_offset = offsets.health_max
-    is_dead_offset = offsets.is_dead_ofuscated_n
+    name_offset = offsets.entity_name
+    name_full_offset = offsets.entity_name_full
+    team_offset = offsets.entity_team
+    pos_offset = offsets.entity_pos
+    is_visible_offset = offsets.entity_is_visible
+    mana_offset = offsets.entity_mana
+    mana_max_offset = offsets.entity_mana_max
+    health_offset = offsets.entity_health
+    health_max_offset = offsets.entity_health_max
+    is_dead_offset = offsets.entity_is_dead_ofuscated_n
+
+    summoner_name_offset = offsets.champion_summoner_name
 
     jungle_camps = jungle_camps
     jungle_monsters = jungle_monsters
@@ -65,6 +70,10 @@ class Entity:
         return BuffManager(self.pm, self.address)
 
     @cached_property
+    def spell_manager(self):
+        return SpellManager(self.pm, self.address)
+
+    @cached_property
     def name_memory(self):
         name_memory = None
         try:
@@ -75,7 +84,7 @@ class Entity:
             except UnicodeDecodeError:
                 pass
         except MemoryReadError:
-            '''Entity from object manager'''
+            '''Entity from entity manager'''
         return name_memory
 
     @cached_property
@@ -93,7 +102,8 @@ class Entity:
 
         return name_memory_full
 
-    @cached_property
+    @property
+    # @needs_vision
     def name(self):
         if self.category == 'jungle_camp_resapwn':
             for name, camp_info in Entity.jungle_camps.items():
@@ -150,11 +160,9 @@ class Entity:
             return 'champion'
 
     @property
-    def position(self):
-        x = self.pm.read_float(self.address + Entity.position_offset)
-        y = self.pm.read_float(self.address + Entity.position_offset + 0x8)
-        z = self.pm.read_float(self.address + Entity.position_offset + 0x4)
-        return {"x": x, "y": y, "z": z}
+    def team(self):
+        team = self.pm.read_short(self.address + Entity.team_offset)
+        return 'blue' if team == 100 else 'red'
 
     @property
     def is_visible(self):
@@ -162,32 +170,45 @@ class Entity:
         return is_visible
 
     @property
+    # @needs_vision
+    def position(self):
+        x = self.pm.read_float(self.address + Entity.pos_offset)
+        y = self.pm.read_float(self.address + Entity.pos_offset + 0x8)
+        z = self.pm.read_float(self.address + Entity.pos_offset + 0x4)
+        return {"x": x, "y": y, "z": z}
+
+    @property
+    # @needs_vision
     def mana(self):
         mana = self.pm.read_float(self.address + Entity.mana_offset)
         return mana
 
     @cached_property
-    def mana_max(self):
-        mana_max = self.pm.read_float(self.address + Entity.mana_max_offset)
-        return mana_max
+    def entity_mana_max(self):
+        entity_mana_max = self.pm.read_float(self.address + Entity.mana_max_offset)
+        return entity_mana_max
 
     @property
-    def mana_ratio(self):
-        return self.mana / self.mana_max
+    # @needs_vision
+    def entity_mana_ratio(self):
+        return self.mana / self.entity_mana_max
 
     @property
+    # @needs_vision
     def health(self):
+        # ! Only updates when you have vision of the monster
         health = self.pm.read_float(self.address + Entity.health_offset)
         return health
 
     @cached_property
-    def health_max(self):
-        health_max = self.pm.read_float(self.address + Entity.health_max_offset)
-        return health_max
+    def entity_health_max(self):
+        entity_health_max = self.pm.read_float(self.address + Entity.health_max_offset)
+        return entity_health_max
 
     @property
-    def health_ratio(self):
-        return self.health / self.health_max
+    # @needs_vision
+    def entity_health_ratio(self):
+        return self.health / self.entity_health_max
 
     # @property
     # def is_dead(self):
@@ -200,10 +221,37 @@ class Entity:
         return True if is_dead % 2 != 0 else False
 
     @property
-    def has_been_attacked(self):
-        if self.health_ratio != 1:
+    def summoner_name(self):
+        summoner_name = self.pm.read_string(self.address + Entity.summoner_name_offset)
+        return summoner_name
+
+    @needs_vision
+    def has_been_attacked(self, game_time):
+        if self.entity_health_ratio != 1:
             return True
         for buff in self.buff_manager.buffs:
-            if buff.name not in Entity.jungle_buffs:
+            if buff.name not in Entity.jungle_buffs and game_time <= buff.end_time:
                 return True
+        return False
+
+    def set_spells(self, game_time):
+        # https://stackoverflow.com/questions/2827623/how-can-i-create-an-object-and-add-attributes-to-i
+        self.spells = lambda: None
+        setattr(self.spells, 'summoner', lambda: None)
+        for spell in self.spell_manager.spells:
+            if spell.is_summoner:
+                summoner_name = spell.name.replace('Summoner', '')
+                summoner_name = 'Smite' if summoner_name.startswith('Smite') else summoner_name
+                setattr(self.spells.summoner, summoner_name, spell)
+            else:
+                setattr(self.spells, spell.key, spell)
+        for spell_key, spell in self.spells.__dict__.items():
+            if spell_key != 'summoner':
+                spell._game_time = game_time
+        for spell_key, spell in self.spells.summoner.__dict__.items():
+            spell._game_time = game_time                
+
+    def is_hovered(self, cursor):
+        if self.address == cursor.entity_hovered.address:
+            return True
         return False

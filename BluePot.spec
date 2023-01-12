@@ -5,6 +5,7 @@ block_cipher = None
 
 
 added_files = [
+    ('data/*csv', 'data'),
     ('data/*json', 'data'),
     ( 'src/img/*.png', 'src/img' ),
     ( 'src/img/potion.ico', 'src/img' ),

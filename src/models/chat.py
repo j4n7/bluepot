@@ -4,17 +4,17 @@ import data.offsets as offsets
 
 
 class Chat:
-    chat_offset = offsets.chat
-    times_open_offset = offsets.times_open
-    messages_sent_count_offset = offsets.messages_sent_count
-    message_sent_0_offset = offsets.message_sent_0
-    message_sent_0_len_offset = offsets.message_sent_0_len
-    message_current_offset = offsets.message_current
-    message_current_len_offset = offsets.message_current_len
+    offset = offsets.chat
+    times_open_offset = offsets.chat_times_open
+    messages_sent_count_offset = offsets.chat_messages_sent_count
+    message_sent_0_offset = offsets.chat_message_sent_0
+    message_sent_0_len_offset = offsets.chat_message_sent_0_len
+    message_current_offset = offsets.chat_message_current
+    message_current_len_offset = offsets.chat_message_current_len
 
     def __init__(self, pm):
         self.pm = pm
-        self.address = pm.read_int(pm.base_address + Chat.chat_offset)
+        self.address = pm.read_int(pm.base_address + Chat.offset)
 
     @property
     def times_open(self):

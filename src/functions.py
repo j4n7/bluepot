@@ -1,7 +1,9 @@
 import sys
+import wmi
 import json
-import requests
 import urllib3
+import requests
+import pythoncom
 
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -26,7 +28,40 @@ def get_base_dir():
     else:
         base_dir = Path(__file__).parent.parent
     return base_dir
-    
+
+
+def get_offset(entry):
+    def hex_to_int(str_):
+        return int(str_, 16)
+    return hex_to_int(entry['value'])
+
+
+def offsets_need_update(remote, local):
+    remote = [int(n) for n in remote['version'].split('.')]
+    local = [int(n) for n in local['version'].split('.')]
+    if remote[0] > local[0] or remote[1] > local[1]:
+        return True
+    return False
+
+
+def get_game_info():
+    pythoncom.CoInitialize()  # Run in thread
+
+    c = wmi.WMI()
+
+    for process in c.Win32_Process(name='League of Legends.exe'):
+        command_line = process.CommandLine.replace('"', '')
+
+    arguments = ['-' + str_ for n, str_ in enumerate(command_line.split(' -')) if n != 0]
+
+    for argument in arguments:
+        if argument.startswith('-GameID='):
+            game_id = argument.replace('-GameID=', '')
+        elif argument.startswith('-Region='):
+            region = argument.replace('-Region=', '')
+
+    return game_id, region
+
 
 def get_game_stats():
     game_stats_request = requests.get(lol_live_game_stats_url, verify=False)
@@ -85,8 +120,9 @@ def is_game_live():
 
 
 def parse_time(time):
-    time = datetime.strptime(time, '%M:%S')
-    delta = timedelta(minutes=time.minute, seconds=time.second)
+    format = '%M:%S.%f' if time[-3] == '.' else '%M:%S'
+    time = datetime.strptime(time, format)
+    delta = timedelta(minutes=time.minute, seconds=time.second, microseconds=time.microsecond)
     return delta
 
 

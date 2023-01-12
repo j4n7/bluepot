@@ -1,0 +1,560 @@
+{
+    "version": "13.1",
+    "patch": {
+        "value": "0x3174E70",
+        "type": "Str",
+        "coments": "<League of Legends.exe> + 0x3174E70"
+    },
+    "game_time": {
+        "value": "0x315CCF4",
+        "type": "Float",
+        "coments": "<League of Legends.exe> + 0x315CCF4"
+    },
+    "cursor": [
+        {
+            "value": "0x2514404",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x2514404]"
+        },
+        {
+            "entity_hovered": {
+                "value": "0xC",
+                "type": "Ptr"
+            },
+            "pos_x": {
+                "value": "0x38",
+                "type": "Int32",
+                "comments": "0 = left side; can be negative if outside window"
+            },
+            "pos_y": {
+                "value": "0x3C",
+                "type": "Int32",
+                "comments": "0 = top side; can be negative if outside window"
+            }
+        }
+    ],
+    "chat": [
+        {
+            "value": "0x3163F94",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x3163F94]"
+        },
+        {
+            "times_open": {
+                "value": "0x6BC",
+                "type": "Int32",
+                "comments": "0 = chat closed"
+            },
+            "messages_sent_count": {
+                "value": "0x9C",
+                "type": "Int32",
+                "alt": "0xA0",
+                "comments": "Maybe total count?"
+            },
+            "message_sent_0": {
+                "value": "0xA4",
+                "type": "Text8Ptr",
+                "comments": "+ 0xC for next message"
+            },
+            "message_sent_0_len": {
+                "value": "0xA8",
+                "type": "Int32",
+                "comments": "+ 0xC for next message"
+            },
+            "message_current": {
+                "value": "0x69C",
+                "type": "Text16Ptr"
+            },
+            "message_current_len": {
+                "value": "0x6AC",
+                "type": "Int32",
+                "alt": ["0x6D0", "0x6F4"]
+            }
+        }
+    ],
+    "minimap": [
+        {
+            "value": "0x315CD38",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x315CD38]"
+        },
+        {
+            "pos": {
+                "value": "0x48",
+                "type": "Int32",
+                "comments": "left = 65793, right = 257, maybe coords?"
+            },
+            "size_min": {
+                "value": "0x4C",
+                "type": "Float"
+            },
+            "size_max": {
+                "value": "0x50",
+                "type": "Float"
+            },
+            "size": {
+                "value": "0x54",
+                "type": "Float",
+                "comments": "0.75 - 1.5"
+            },
+            "data": [
+                {
+                    "value": "0x15C",
+                    "type": "Ptr"
+                },
+                {
+                    "coord_neg_a": {
+                        "value": "0x34",
+                        "type": "Float",
+                        "alt": "0x3C"
+                    },
+                    "coord_neg_b": {
+                        "value": "0x38",
+                        "type": "Float",
+                        "alt": "0x40"
+                    },
+                    "size_a": {
+                        "value": "0x44",
+                        "type": "Float",
+                        "alt": "0x4C"
+                    },
+                    "size_b": {
+                        "value": "0x48",
+                        "type": "Float",
+                        "alt": "0x50"
+                    }
+                }
+            ]
+        }
+    ],
+    "unit": {
+        "manager": {
+            "value": "0x2514284",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x2514284]"
+        }
+    },
+    "tower": {
+        "manager": {
+            "value": "0x315BA04",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x315BA04]"
+        }
+    },
+    "champion": {
+        "manager": {
+            "value": "0x18C6BBC",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x18C6BBC]"
+        },
+        "local": {
+            "value": "0x3163080",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x3163080]"
+        },
+        "summoner_name": {
+            "value": "0x54",
+            "type": "Text8[len]"
+        },
+        "summoner_name_len": {
+            "value": "0x64",
+            "type": "Int32"
+        },
+        "recall_state": {
+            "value": "0xD90",
+            "type": "Int32",
+            "alt": "0xD78",
+            "comments": "6 = normal; 11 = herald/baron"
+        },
+        "gold": {
+            "value": "0x1BBC",
+            "type": "Float"
+        },
+        "gold_max": {
+            "value": "0x1BCC",
+            "type": "Float"
+        }
+    },
+    "entity": {
+        "manager": [
+            {
+                "value": "0x18C6B1C",
+                "type": "Object",
+                "comments": "[<League of Legends.exe> + 0x18C6B1C]"
+            },
+            {
+                "list": {
+                    "value": "0x14",
+                    "type": "Ptr"
+                },
+                "list_len": {
+                    "value": "0x2C",
+                    "type": "Int32",
+                    "alt": "0x38"
+                },
+                "last": {
+                    "value": "0x20",
+                    "type": "Ptr"
+                }
+            }
+        ],
+        "buff": {
+            "manager": [
+                {
+                    "value": "0x2340",
+                    "type": "Object"
+                },
+                {
+                    "list_start": {
+                        "value": "0x10",
+                        "type": "Ptr"
+                    },
+                    "list_end": {
+                        "value": "0x14",
+                        "type": "Ptr"
+                    }
+                }
+            ],
+            "name": {
+                "value": "0x8",
+                "type": "Ptr",
+                "comments": "Trash entitys dont't have a name"
+            },
+            "start_time": {
+                "value": "0xC",
+                "type": "Float",
+                "alt": "0x18"
+            },
+            "end_time": {
+                "value": "0x10",
+                "type": "Float"
+            }
+        },
+        "spell": {
+            "book": [
+                {
+                    "value": "0x2508",
+                    "type": "Object"
+                },
+                {
+                    "slots": [
+                        {
+                            "value": "0x4C8",
+                            "type": "Object"
+                        },
+                        {
+                            "level": {
+                                "value": "0x1C",
+                                "type": "Int32"
+                            },
+                            "cooldown_game_time": {
+                                "value": "0x24",
+                                "type": "Float",
+                                "comments": "Time in game seconds when the spell is going to be ready again"
+                            },
+                            "cooldown_max_time": {
+                                "value": "0x74",
+                                "type": "Float",
+                                "comments": "Static number, updates after spell is casted; 0, 15 (summoner) = spell never used before"
+                            },
+                            "charge_cooldown_game_time": {
+                                "value": "0x60",
+                                "type": "Float",
+                                "comments": "Time in game seconds when the charge is going to be ready again"
+                            },
+                            "charge_cooldown_max_time": {
+                                "value": "0x64",
+                                "type": "Float",
+                                "comments": "Updates after spell is casted, all charges need to be used before automatically updating this value (spell haste)"
+                            },
+                            "charges_n": {
+                                "value": "0x54",
+                                "type": "Int32"
+                            },
+                            "damage": {
+                                "value": "0x94",
+                                "type": "Float",
+                                "comments": "Probably only makes sense in the case of Smite"
+                            },
+                            "is_used": {
+                                "value": "0xEC",
+                                "type": "Int16",
+                                "comments": "0 = not used; 256 = used; only works in some cases"
+                            },
+                            "casted_game_time": {
+                                "value": "0x108",
+                                "type": "Float",
+                                "comments": "Only works in some cases"
+                            },
+                            "data": [
+                                {
+                                    "value": "0x120",
+                                    "type": "Ptr"
+                                },
+                                {
+                                    "name": {
+                                        "value": "0x18",
+                                        "type": ["Text8[len]", "TextPtr"],
+                                        "comments": "Type changes with champion, not reliable"
+                                    },
+                                    "name_len": {
+                                        "value": "0x28",
+                                        "type": "Int32"
+                                    },
+                                    "data": [
+                                        {
+                                            "value": "0x40",
+                                            "type": "Ptr"
+                                        },
+                                        {
+                                            "name": {
+                                                "value": "0x6C",
+                                                "type": "Text8Ptr",
+                                                "alt": "0x90"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "active": [
+                        {
+                            "value": "0x20",
+                            "type": "Object"
+                        },
+                        {
+                            "data": [
+                                {
+                                    "value": "0x8",
+                                    "type": "Ptr"
+                                },
+                                {
+                                    "name": {
+                                        "value": "0x18",
+                                        "type": ["Text8[len]", "TextPtr"],
+                                        "comments": "Type changes with champion, not reliable"
+                                    },
+                                    "name_len": {
+                                        "value": "0x28",
+                                        "type": "Int32"
+                                    }
+                                }
+                            ],
+                            "cooldown_game_time": {
+                                "value": "0x10",
+                                "type": "Float"
+                            },
+                            "cooldown_max_time": {
+                                "value": "0xE4",
+                                "type": "Float"
+                            },
+                            "index_source": {
+                                "value": "0x6C",
+                                "type": "Int16"
+                            },
+                            "index_target": [
+                                {
+                                    "value": "0xC4",
+                                    "type": "Ptr"
+                                },
+                                {
+                                    "value": "0x0",
+                                    "type": "Int16"
+                                }
+                            ],
+                            "pos_start": {
+                                "value": "0x88",
+                                "type": "Vector3",
+                                "comments": "x, z, y"
+                            },
+                            "pos_end_1": {
+                                "value": "0x94",
+                                "type": "Vector3",
+                                "comments": "x, z, y"
+                            },
+                            "pos_end_2": {
+                                "value": "0xA0",
+                                "type": "Vector3",
+                                "comments": "x, z, y"
+                            },
+                            "wind_up_time": {
+                                "value": "0xD0",
+                                "type": "Float"
+                            },
+                            "attack_complete_time": {
+                                "value": "0xE0",
+                                "type": "Float"
+                            },
+                            "slot": {
+                                "value": "0xF8",
+                                "type": "Int32",
+                                "comments": "aa = 64,65; q = 0; w = 1; e = 2; r = 3"
+                            },
+                            "mana_cost": {
+                                "value": "0x100",
+                                "type": "Float"  
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "index": {
+            "value": "0x8",
+            "type": "Int16"
+        },
+        "team": {
+            "value": "0x34",
+            "type": "Int16",
+            "comments": "100 = Blue; 200 = Red"
+        },
+        "name_full": {
+            "value": "0x54",
+            "type": "Text8Ptr",
+            "comments": "Works only in multi camp monsters and towers"
+        },
+        "pos": {
+            "value": "0x1DC",
+            "type": "Vector3",
+            "alt": "0x224",
+            "comments": "x, z, y"
+        },
+        "is_visible": {
+            "value": "0x274",
+            "type": "Bool"
+        },
+        "is_dead_ofuscated_n": {
+            "value": "0x288",
+            "type": "Int8",
+            "comments": "0, 2 = alive; 1, 3 = dead"
+        },
+        "is_dead_ofuscated_1": {
+            "value": "0x290",
+            "type": ""
+        },
+        "is_dead_ofuscated_3": {
+            "value": "0x298",
+            "type": ""
+        },
+        "mana": {
+            "value": "0x29C",
+            "type": "Float"
+        },
+        "mana_max": {
+            "value": "0x2AC",
+            "type": "Float"
+        },
+        "health": {
+            "value": "0xE7C",
+            "type": "Float"
+        },
+        "health_max": {
+            "value": "0xE8C",
+            "type": "Float"
+        },
+        "name": {
+            "value": "0x2DBC",
+            "type": "Text8Ptr",
+            "alt": "0x3198"
+        },
+        "aa_index_target": {
+            "value": "0x2FC4",
+            "type": "Int16"
+        },
+        "level": {
+            "value": "0x35AC",
+            "type": "Int32"
+        },
+        "attack_spped_bonus": {
+            "value": "0x132C",
+            "type": "Float",
+            "comments": "Decimal from 0 to 1"
+        },
+        "attack_speed_bonus_multi": {
+            "value": "0x1358",
+            "type": "Float",
+            "comments": "Multiplier, like 1.150"
+        }
+    },
+    "missile": {
+        "manager": {
+            "value": "0x3163F08",
+            "type": "Object",
+            "comments": "[<League of Legends.exe> + 0x3163F08]"
+        },
+        "data": [
+            {
+                "value": "0x14",
+                "type": "Ptr"
+            },
+            {
+                "team": {
+                    "value": "0x34",
+                    "type": "Int16"
+                },
+                "name": {
+                    "value": "0x54",
+                    "type": "Text8Ptr"
+                },
+                "pos_start": {
+                    "value": "0x2E0",
+                    "type": "Vector3",
+                    "comments": "x, z, y"
+                },
+                "pos_end_1": {
+                    "value": "0x2EC",
+                    "type": "Vector3",
+                    "comments": "x, z, y"
+                },
+                "pos_end_2": {
+                    "value": "0xA0",
+                    "type": "Vector3",
+                    "comments": "x, z, y"
+                },
+                "index_source": {
+                    "value": "0x2C4",
+                    "type": "Int16",
+                    "alt": "0X2C8",
+                    "comments": "Short, 4 digit number"
+                },
+                "index_target": [
+                    {
+                        "value": "0x31C",
+                        "type": "Ptr"
+                    },
+                    {
+                        "value": "0x0",
+                        "type": "Int16"
+                    }
+                ],
+                "data": [
+                    {
+                        "value": "0x260",
+                        "type": "Ptr"
+                    },
+                    {
+                        "name": {
+                            "value": "0x18",
+                            "type": ["Text8[len]", "Text8Ptr"],
+                            "comments": "Pointer if aa"
+                        },
+                        "champion_name": {
+                            "value": "0x278",
+                            "type": "Text8[len]"
+                        },
+                        "champion_name_len": {
+                            "value": "0x288",
+                            "type": "Int32"
+                        },
+                        "slot": {
+                            "value": "0x350",
+                            "type": "Int32",
+                            "comments": "aa = 64,65; q = 0; w = 1; e = 2; r = 3"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
